@@ -26,8 +26,17 @@ class BaseScheduler(ABC):
         self.schedule()  # Attempt to schedule whenever a new task arrives
 
 
-    def on_resource_free(self, resource: BaseProcessor):
+    def on_resource_free(self, resource: BaseProcessor, task):
         """Triggered when a resource becomes free."""
+
+        # After scheduling, finish task after quantum/interrupt or when done
+        # re-add the task to the end of the queue if it's not finished
+        if task.remaining_size > 0:
+            self.queue.append(task)
+            self.logger.info(f"Task {task.task_id} quantum expired at time {self.env.now}, re-adding to queue with remaining size {task.remaining_size}.", extra={"task": task, "env": self.env})
+        else:
+            self.logger.info(f"Task {task.task_id} completed at time {self.env.now}.", extra={"task": task, "env": self.env})
+
         self.schedule()  # Resource is free, attempt to schedule
 
 

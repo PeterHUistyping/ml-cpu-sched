@@ -77,7 +77,7 @@ class BaseProcessor(ABC):
     def on_task_finished(self, task: BaseTask):
         """Callback function; concrete implementation injected by subclass or Scheduler"""
         if self.scheduler:
-            self.scheduler.on_resource_free(self)
+            self.scheduler.on_resource_free(self, task)
     
 
     def visualization_plot(self, scheduling_strategy='', output_dir = "outputs/"):

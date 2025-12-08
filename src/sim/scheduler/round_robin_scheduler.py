@@ -14,6 +14,7 @@ class RoundRobinScheduler(BaseScheduler):
     def __init__(self, env: simpy.Environment, resources: List[BaseProcessor], quantum: float = 1.0):
         super().__init__(env, resources)
         self.quantum = quantum  # Time quantum for round robin scheduling
+        self.logger.info(f"Round Robin Scheduler initialized with quantum = {self.quantum}.", extra={"env": self.env})
 
 
     # @override
@@ -36,15 +37,12 @@ class RoundRobinScheduler(BaseScheduler):
         return selected_resource
     
 
-    def post_schedule_hook(self, task, resource):
-        # After scheduling, finish task after quantum or when done
-        # re-add the task to the end of the queue if it's not finished
-        self.env.process(resource.process(task, self.quantum))
-        if task.remaining_size > 0:
-            self.queue.append(task)
-            self.logger.info(f"Task {task.task_id} quantum expired at time {self.env.now}, re-adding to queue with remaining size {task.remaining_size}.", extra={"task": task, "env": self.env})
-        else:
-            self.logger.info(f"Task {task.task_id} completed at time {self.env.now}.", extra={"task": task, "env": self.env})
+    # @override
+    def post_schedule_hook(self, task: BaseTask, resource: BaseProcessor):
+        """Hook for any post-scheduling actions."""
+        self.env.process(resource.process(task, quantum=self.quantum))
+
+
 
 
         
