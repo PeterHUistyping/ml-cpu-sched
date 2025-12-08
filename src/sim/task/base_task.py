@@ -6,16 +6,22 @@ from typing import Optional, Any
 class BaseTask:
     '''
         This is a generic concept:
-            For CPU, size = number of instructions
+            For CPU, size = number of instructions, 
+                here we assume the unit to be the smallest instruction.
             For Network, size = packet size (MB)
             For Factory, size = processing time
     '''
     task_id: int
     arrival_time: float
     size: float
+    remaining_size: float = 0.0
 
     # Record deadline or finish time if applicable, else None
     finish_time: Optional[float] = None
+
+
+    def __post_init__(self):
+        self.remaining_size = self.size
 
 
     @property

@@ -14,23 +14,36 @@ class TaskFactory:
     def __init__(self, n_tasks: int):
 
         self.n_tasks = n_tasks
+        self.tasks = []
 
         # fixed seed for reproducibility
         random.seed(42)
 
 
-    def create_tasks(self):
+    def sort_tasks_by_arrival_time(self):
+        '''
+            Sort the tasks by their arrival time in ascending order.
+        '''
+        self.tasks.sort(key=lambda x: x.arrival_time)
+
+
+    def create_tasks(self, SORT_BY_ARRIVAL_TIME=True) -> list[BaseTask]:
         '''
             Create n_tasks tasks with random arrival times and sizes.
         '''
-        self.tasks = []
         for i in range(1, self.n_tasks + 1):
             # create a random number 
             arrival_time = random.uniform(0, 10)  # e.g., arrival time between 0 and 100
             size = random.uniform(1, 8)  # e.g., size between 1 and 10
             task = BaseTask(task_id=i, arrival_time=arrival_time, size=size)
-            task.print_info()
+            # task.print_info()
             self.tasks.append(task)
+
+        # sort tasks by arrival time
+        if SORT_BY_ARRIVAL_TIME:
+            self.sort_tasks_by_arrival_time()
+
+        return self.tasks
     
 
     def visualize_tasks(self, output_dir='outputs/'):
@@ -55,5 +68,5 @@ class TaskFactory:
 
 if __name__ == "__main__":
     factory = TaskFactory(n_tasks=10)
-    factory.create_tasks()
+    factory.create_tasks(SORT_BY_ARRIVAL_TIME=False)
     factory.visualize_tasks()
