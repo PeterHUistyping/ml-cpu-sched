@@ -5,7 +5,7 @@
 [L48 MLPW project] A machine learning-based study for scheduling: Energy-performance-aware scheduling in heterogeneous multi-core systems.
 
 
-### Installation
+## Installation
 
 ```shell
 conda create -n ml-sched python=3.10 -y
@@ -13,6 +13,16 @@ conda activate ml-sched
 pip install optuna
 pip install seaborn
 ```
+
+## Run 
+
+To run the simulation, execute the following command with the desired global settings,
+
+```shell
+python src/sim/simulator.py
+```
+
+> The simulation results will be saved in the `outputs/` directory, including the `sim_report_<scheduling_strategy>.html` reports (visualizations and detailed logs).
 
 ## Code structure
 - `src/sim/`
