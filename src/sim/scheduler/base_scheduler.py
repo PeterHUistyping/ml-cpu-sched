@@ -5,14 +5,13 @@ import simpy
 
 from src.sim.task.base_task import BaseTask
 from src.sim.processor.base_processor import BaseProcessor
-from src.utils.logging import *
 
 
 class BaseScheduler(ABC):
     '''
         Default first come first serve scheduler implementation, without interruptions.
     '''
-    def __init__(self, env: simpy.Environment, resources: List[BaseProcessor]):
+    def __init__(self, env: simpy.Environment, resources: List[BaseProcessor], logging):
         self.env = env
         self.resources = resources
         self.queue = []  # type: List[BaseTask]
@@ -35,6 +34,7 @@ class BaseScheduler(ABC):
             self.queue.append(task)
             self.logger.info(f"Task {task.task_id} quantum expired at time {self.env.now}, re-adding to queue with remaining size {task.remaining_size}.", extra={"task": task, "env": self.env})
         else:
+            task.finish_time = self.env.now
             self.logger.info(f"Task {task.task_id} completed at time {self.env.now}.", extra={"task": task, "env": self.env})
 
         self.schedule()  # Resource is free, attempt to schedule

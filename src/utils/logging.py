@@ -1,5 +1,11 @@
 import logging
 
-logging.basicConfig(filename='outputs/simulation.log', 
+
+def create_logger(extra_args=''):
+    logging.basicConfig(filename=f'outputs/simulation_{extra_args}.log', 
     filemode='w',
     level=logging.INFO)
+
+    return logging
+
+    
