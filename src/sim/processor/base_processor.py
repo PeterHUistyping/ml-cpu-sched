@@ -47,6 +47,9 @@ class BaseProcessor(ABC):
 
         start_time = self.env.now
 
+        if task.start_time < 0:
+            task.start_time = start_time
+
         # Calculate how long it takes to process this task
         self.logger.info(f"started processing Task {task.task_id} at time {start_time} with remaining size {task.remaining_size}.", extra={"task": task, "env": self.env, "processor": self})
 
