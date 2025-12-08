@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from src.utils.plot_style import set_plot_style
 import random
 
+
 class TaskFactory:
     '''
         A factory class for creating BaseTask objects.

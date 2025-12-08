@@ -13,3 +13,9 @@ conda activate ml-sched
 pip install optuna
 pip install seaborn
 ```
+
+## Code structure
+- `src/sim/`
+  - `task/`: define single task with its attributes and factory class to generate tasks.
+  - `processor/`: define single processor with its attributes and factory class to generate processors.
+  - `scheduler/`: define various scheduling algorithms inheriting from the base scheduler, e.g. round-robin, priority-based, CFS, etc.
