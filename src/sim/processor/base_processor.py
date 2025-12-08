@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Optional, Any
 import simpy
+import random
 import matplotlib.pyplot as plt
 
 from src.sim.task.base_task import BaseTask
@@ -18,7 +19,6 @@ class BaseProcessor(ABC):
         env: simpy.Environment,
         processor_id: int,
         frequency: float = 1.0,
-        scheduler: Optional[Any] = None,
     ):
         self.env = env
         self.id = processor_id
@@ -26,15 +26,15 @@ class BaseProcessor(ABC):
 
         # Processing speed (e.g., CPU frequency or factory machine efficiency)
         self.frequency = frequency
+        self.logger.info(f"Initial frequency = {self.frequency}.", extra={"processor": self, "env": self.env})
+        
         self.current_task: Optional[BaseTask] = None
-
-        self.scheduler = scheduler  # type: Optional[BaseScheduler]
+        self.scheduler = None  # to be assigned after initialization.
 
         # if the processor is running a task
         self.busy = False
 
-        # record of assignments for analysis
-        # (start_time, finish_time, task)
+        # record of assignments for analysis: (start_time, finish_time, task)
         self.assignments = []  # type: List[tuple]
 
 
@@ -48,7 +48,7 @@ class BaseProcessor(ABC):
         start_time = self.env.now
 
         # Calculate how long it takes to process this task
-        self.logger.info(f"started processing Task {task.task_id} at time {start_time}.", extra={"task": task, "env": self.env, "processor": self})
+        self.logger.info(f"started processing Task {task.task_id} at time {start_time} with remaining size {task.remaining_size}.", extra={"task": task, "env": self.env, "processor": self})
 
         processing_time = task.remaining_size / self.frequency
         if quantum is not None:
@@ -84,12 +84,18 @@ class BaseProcessor(ABC):
         """Helper method to visualize the processor's assignments."""
         set_plot_style()
 
-        fig, ax = plt.subplots(figsize=(10, 2))
+        fig, ax = plt.subplots(figsize=(20, 2))
         for start, end, task in self.assignments:
             task_id = task.task_id
             color = task.color 
             ax.broken_barh([(start, end - start)], (0, 5), facecolors=(color))
-            ax.text((start + end) / 2, 2.5, f'{task_id}', ha='center', va='center', color='white')
+            # y position w.r.t the task id
+            # depending on end-start, if too small, randomize y position
+            if end - start < 0.5:
+                y_pos = random.uniform(0.5, 4.5)
+            else:
+                y_pos = 2.5
+            ax.text((start + end) / 2, y_pos, f'{task_id}', ha='center', va='center', color='white')
 
         ax.set_ylim(0, 5)
         ax.set_xlim(0, max(end for _, end, _ in self.assignments) + 10)

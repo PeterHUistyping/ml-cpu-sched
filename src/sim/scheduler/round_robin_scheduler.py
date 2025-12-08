@@ -42,6 +42,9 @@ class RoundRobinScheduler(BaseScheduler):
         self.env.process(resource.process(task, self.quantum))
         if task.remaining_size > 0:
             self.queue.append(task)
+            self.logger.info(f"Task {task.task_id} quantum expired at time {self.env.now}, re-adding to queue with remaining size {task.remaining_size}.", extra={"task": task, "env": self.env})
+        else:
+            self.logger.info(f"Task {task.task_id} completed at time {self.env.now}.", extra={"task": task, "env": self.env})
 
 
         

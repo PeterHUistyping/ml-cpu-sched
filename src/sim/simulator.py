@@ -50,7 +50,7 @@ def write_results_html(output_dir="outputs/"):
         # append simulation.log contents
     '''
     with open(f"{output_dir}sim_report_{scheduling_strategy}.html", "w") as f:
-        f.write("<html><head><title>Simulation Report</title></head><body>\n")
+        f.write(f"<html><head><title>{scheduling_strategy} Sim.</title></head><body>\n")
         f.write("<h1>Simulation Report</h1>\n")
 
         f.write("<h2>Task Factory Visualization</h2>\n")
