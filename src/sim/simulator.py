@@ -91,7 +91,7 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
             f.write("</body></html>\n")
 
 
-def write_analysis_file(output_dir="outputs/"):
+def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False):
     '''
         Write analysis results into a text file.
     '''
@@ -100,13 +100,16 @@ def write_analysis_file(output_dir="outputs/"):
     response_time_list = []
     with open(f"{output_dir}analysis_{extra_args}.txt", "w") as f:
 
+        f.write(f"Simulation Analysis Results for {extra_args}\n")
+
         for task in tasks_list:
 
             response_time = task.start_time - task.arrival_time
 
-            f.write(f"[Task {task.task_id}] turn around time = {task.duration} (finish={task.finish_time} - arrival={task.arrival_time}) \n \t total task size = {task.size}, \n")
-                    
-            f.write(f"\t response time = {response_time} (start={task.start_time} - arrival={task.arrival_time})\n")
+            if WRITE_SINGLE_TASK_ANALYSIS:
+                f.write(f"[Task {task.task_id}] turn around time = {task.duration} (finish={task.finish_time} - arrival={task.arrival_time}) \n \t total task size = {task.size}, \n")
+                        
+                f.write(f"\t response time = {response_time} (start={task.start_time} - arrival={task.arrival_time})\n")
 
             duration_list.append(task.duration)
             response_time_list.append(response_time)
