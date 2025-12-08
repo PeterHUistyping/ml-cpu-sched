@@ -21,6 +21,7 @@ scheduling_strategy = SchedulingStrategy.ROUND_ROBIN
 n_tasks = 10
 n_processors = 1
 t_simulation_end = 100
+quantum = 1.0  # time quantum for Round Robin
 
 
 def task_arrival_generator(env: simpy.Environment, tasks: List[BaseTask], scheduler: RoundRobinScheduler):
@@ -86,7 +87,7 @@ if __name__ == "__main__":
     if scheduling_strategy == SchedulingStrategy.FCFS:
         scheduler = BaseScheduler(env, processors)
     elif scheduling_strategy == SchedulingStrategy.ROUND_ROBIN:
-        scheduler = RoundRobinScheduler(env, processors, quantum=1.0)
+        scheduler = RoundRobinScheduler(env, processors, quantum=quantum)
 
     for processor in processors:
         processor.scheduler = scheduler  # link back the scheduler to the processor
