@@ -71,7 +71,7 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
         f.write(f"<h2>Scheduler {scheduling_strategy} Processor Timelines</h2>\n")
         for i in range(n_processors):
             f.write(f'<h3>Processor {i} Timeline</h3>\n')
-            f.write(f'<img src="processor_{i}_timeline_{scheduling_strategy}.png" alt="Processor {i} Timeline"><br>\n')
+            f.write(f'<img src="processor_{i}_timeline_{extra_args}.png" alt="Processor {i} Timeline"><br>\n')
 
         if WRITE_ANALYSIS:
             f.write("<h2>Analysis Results</h2>\n")
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     print("Simulation completed.")
 
     for processor in processors:
-        processor.visualization_plot(scheduling_strategy)
+        processor.visualization_plot(extra_args=extra_args)
     
     write_analysis_file()
 

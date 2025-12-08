@@ -83,7 +83,7 @@ class BaseProcessor(ABC):
             self.scheduler.on_resource_free(self, task)
     
 
-    def visualization_plot(self, scheduling_strategy='', output_dir = "outputs/"):
+    def visualization_plot(self, extra_args='', output_dir = "outputs/"):
         """Helper method to visualize the processor's assignments."""
         set_plot_style()
 
@@ -110,7 +110,7 @@ class BaseProcessor(ABC):
         plt.setp(ax.get_yticklabels(), rotation=90, ha='right', rotation_mode='anchor')
         ax.set_title(f'Processor {self.id} Assignment Timeline')
         plt.tight_layout()
-        plt.savefig(f"{output_dir}processor_{self.id}_timeline_{scheduling_strategy}.png")
+        plt.savefig(f"{output_dir}processor_{self.id}_timeline_{extra_args}.png")
         plt.close()
        
 
