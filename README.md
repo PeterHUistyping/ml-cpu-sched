@@ -19,6 +19,8 @@ pip install seaborn
 To run the simulation, execute the following command with the desired global settings,
 
 ```shell
+export PYTHONPATH="$(pwd):$PYTHONPATH"
+
 python src/sim/simulator.py
 ```
 
