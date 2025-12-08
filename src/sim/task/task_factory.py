@@ -38,10 +38,14 @@ class TaskFactory:
             task = BaseTask(task_id=i, arrival_time=arrival_time, size=size)
             # task.print_info()
             self.tasks.append(task)
-
+            
         # sort tasks by arrival time
         if SORT_BY_ARRIVAL_TIME:
             self.sort_tasks_by_arrival_time()
+        
+        for task in self.tasks:
+            # assign a color for visualization based on task ID
+            task.color = plt.cm.tab20(task.task_id % self.n_tasks)
 
         return self.tasks
     
@@ -55,9 +59,7 @@ class TaskFactory:
         sizes = [task.size for task in self.tasks]
         plt.figure(figsize=(10, 6))
         for i, task in enumerate(self.tasks):
-            color = plt.cm.tab20(task.task_id % 20)
-
-            plt.barh(y=i, width=task.size, left=task.arrival_time, height=0.4, align='center', alpha=0.7, color=color) 
+            plt.barh(y=i, width=task.size, left=task.arrival_time, height=0.4, align='center', alpha=0.7, color=task.color) 
             plt.text(task.arrival_time + task.size / 2, i, f'Task {task.task_id}', va='center', ha='center', color='black')
         plt.xlabel('Time')
         plt.ylabel('Tasks')

@@ -18,6 +18,7 @@ class BaseTask:
 
     # Record deadline or finish time if applicable, else None
     finish_time: Optional[float] = None
+    color: Optional[Any] = None     # color for visualization
 
 
     def __post_init__(self):

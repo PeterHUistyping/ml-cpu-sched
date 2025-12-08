@@ -34,7 +34,7 @@ class BaseProcessor(ABC):
         self.busy = False
 
         # record of assignments for analysis
-        # (start_time, finish_time, task_id)
+        # (start_time, finish_time, task)
         self.assignments = []  # type: List[tuple]
 
 
@@ -70,7 +70,7 @@ class BaseProcessor(ABC):
         self.on_task_finished(task)
 
         # Record the assignment
-        self.assignments.append((start_time, finish_time, task.task_id))
+        self.assignments.append((start_time, finish_time, task))
 
 
     # @abstractmethod
@@ -85,9 +85,9 @@ class BaseProcessor(ABC):
         set_plot_style()
 
         fig, ax = plt.subplots(figsize=(10, 2))
-        for start, end, task_id in self.assignments:
-            # random color for each task
-            color = plt.cm.tab20(task_id % 20)
+        for start, end, task in self.assignments:
+            task_id = task.task_id
+            color = task.color 
             ax.broken_barh([(start, end - start)], (0, 5), facecolors=(color))
             ax.text((start + end) / 2, 2.5, f'{task_id}', ha='center', va='center', color='white')
 
