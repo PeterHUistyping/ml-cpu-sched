@@ -50,7 +50,7 @@ class BaseProcessor(ABC):
         # Calculate how long it takes to process this task
         self.logger.info(f"started processing Task {task.task_id} at time {start_time}.", extra={"task": task, "env": self.env, "processor": self})
 
-        processing_time = task.size / self.frequency
+        processing_time = task.remaining_size / self.frequency
         if quantum is not None:
             processing_time = min(processing_time, quantum)
         reduced_size = min(processing_time * self.frequency, task.remaining_size)
