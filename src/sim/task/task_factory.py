@@ -34,7 +34,7 @@ class TaskFactory:
         for i in range(1, self.n_tasks + 1):
             # create a random number 
             arrival_time = random.uniform(0, 10)  # e.g., arrival time between 0 and 100
-            size = random.uniform(1, 8)  # e.g., size between 1 and 10
+            size = random.uniform(0, 8)  # e.g., size between 1 and 10
             task = BaseTask(task_id=i, arrival_time=arrival_time, size=size)
             # task.print_info()
             self.tasks.append(task)
