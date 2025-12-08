@@ -21,15 +21,14 @@ scheduling_strategy = SchedulingStrategy.ROUND_ROBIN
 n_tasks = 10
 n_processors = 1
 t_simulation_end = 40
-quantum = 1.0  # time quantum for Round Robin
+frequency = 1.0     # processor frequency (GHz)
+quantum = 1.0       # time quantum for Round Robin (ms)
 
 # determine extra args for filename
-extra_args = ''
+extra_args = f"{scheduling_strategy}_freq={frequency}"
 
 if scheduling_strategy == SchedulingStrategy.ROUND_ROBIN:
-    extra_args = f"{scheduling_strategy}_{quantum}"
-else:
-    extra_args = f"{scheduling_strategy}"
+    extra_args += f"_quantum={quantum}"
 
 # create logger
 logging = create_logger(extra_args=extra_args)
@@ -72,7 +71,7 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
         f.write(f"<h2>Scheduler {scheduling_strategy} Processor Timelines</h2>\n")
         for i in range(n_processors):
             f.write(f'<h3>Processor {i} Timeline</h3>\n')
-            f.write(f'<img src="processor_{i}_timeline_{scheduling_strategy}.png" alt="Processor {i} Timeline"><br>\n')
+            f.write(f'<img src="processor_{i}_timeline_{extra_args}.png" alt="Processor {i} Timeline"><br>\n')
 
         if WRITE_ANALYSIS:
             f.write("<h2>Analysis Results</h2>\n")
@@ -91,6 +90,41 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
             f.write("</body></html>\n")
 
 
+def calculate_energy_consumption(time, frequency):
+    '''
+        param: time, frequency (GHz)
+
+        Power = P_static + P_dynamic
+        P_dynamic = C * V^2 * f 
+        P_static = I_leakage * V
+
+        V = k * f   (simplified voltage-frequency scaling)
+
+        Power = I_leakage * V + C * V^2 * f
+              = I_leakage * k * f + C * (k * f)^2 * f
+        
+        Energy = Power * time
+               = [I_leakage * k * f + C * (k * f)^2] * f * (N / f)
+               = [I_leakage * k * f + C * (k * f)^2] * N
+    '''
+    k = 0.2 / 1e9           # V/GHz -> V/Hz 
+    C = 1e-9                # capacitance (F) 
+    I_leakage = 3e-2        # leakage current (A) 
+
+    time = time / 1e9       # convert ns to s 
+    frequency *= 1e9        # convert GHz to Hz
+
+    V = k * frequency
+    P_static = I_leakage * V
+    P_dynamic = C * (V ** 2) * frequency
+
+    Power = P_static + P_dynamic  # in Watts
+
+    Energy = Power * time  # in Joules
+
+    return Energy
+
+
 def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False):
     '''
         Write analysis results into a text file.
@@ -98,6 +132,7 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
     # turn around time
     duration_list = []
     response_time_list = []
+    energy_list = []
     with open(f"{output_dir}analysis_{extra_args}.txt", "w") as f:
 
         f.write(f"Simulation Analysis Results for {extra_args}\n")
@@ -106,13 +141,19 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
 
             response_time = task.start_time - task.arrival_time
 
+            # TODO: [extension] variable frequency scaling
+            energy = calculate_energy_consumption(task.size/frequency, frequency)
+
             if WRITE_SINGLE_TASK_ANALYSIS:
                 f.write(f"[Task {task.task_id}] turn around time = {task.duration} (finish={task.finish_time} - arrival={task.arrival_time}) \n \t total task size = {task.size}, \n")
                         
                 f.write(f"\t response time = {response_time} (start={task.start_time} - arrival={task.arrival_time})\n")
 
+                f.write(f"\t energy consumption = {energy} J\n")
+
             duration_list.append(task.duration)
             response_time_list.append(response_time)
+            energy_list.append(energy)
 
         duration_numpy = np.array(duration_list)
         avg_duration = np.mean(duration_numpy)
@@ -124,6 +165,12 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
         avg_response_time = np.mean(response_time_numpy)
         var_response_time = np.var(response_time_numpy) 
         f.write(f"[response time] Average : {avg_response_time}, Variance: {var_response_time}\n")
+
+        energy_numpy = np.array(energy_list)
+        avg_energy = np.mean(energy_numpy)
+        var_energy = np.var(energy_numpy)
+        f.write(f"[energy consumption] Average : {avg_energy} J, Variance: {var_energy} J\n")
+
    
 
 if __name__ == "__main__":
@@ -136,7 +183,7 @@ if __name__ == "__main__":
     task_factory.visualize_tasks()
     logger.info(f"Created {len(tasks_list)} tasks.", extra={"tasks": tasks_list})
 
-    processors = [BaseProcessor(env, processor_id=i, logging=logging, frequency=1.0) for i in range(n_processors)]
+    processors = [BaseProcessor(env, processor_id=i, logging=logging, frequency=frequency) for i in range(n_processors)]
 
     # assign scheduler based on the selected strategy
     if scheduling_strategy == SchedulingStrategy.FCFS:
@@ -155,7 +202,7 @@ if __name__ == "__main__":
     print("Simulation completed.")
 
     for processor in processors:
-        processor.visualization_plot(scheduling_strategy)
+        processor.visualization_plot(extra_args=extra_args)
     
     write_analysis_file()
 
