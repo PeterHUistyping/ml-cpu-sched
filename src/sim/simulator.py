@@ -63,7 +63,7 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
         # append simulation.log contents
     '''
     with open(f"{output_dir}sim_report_{extra_args}.html", "w") as f:
-        f.write(f"<html><head><title>{scheduling_strategy} Sim.</title></head><body>\n")
+        f.write(f"<html><head><title>{extra_args} Sim.</title></head><body>\n")
         f.write("<h1>Simulation Report</h1>\n")
 
         f.write("<h2>Task Factory Visualization</h2>\n")
@@ -95,19 +95,32 @@ def write_analysis_file(output_dir="outputs/"):
     '''
         Write analysis results into a text file.
     '''
+    # turn around time
     duration_list = []
+    response_time_list = []
     with open(f"{output_dir}analysis_{extra_args}.txt", "w") as f:
 
         for task in tasks_list:
-            f.write(f"Task {task.task_id}: Duration = {task.duration} (Finish Time={task.finish_time} - Arrival Time={task.arrival_time}) | Total Size = {task.size}, \n")
+
+            response_time = task.start_time - task.arrival_time
+
+            f.write(f"[Task {task.task_id}] turn around time = {task.duration} (finish={task.finish_time} - arrival={task.arrival_time}) \n \t total task size = {task.size}, \n")
+                    
+            f.write(f"\t response time = {response_time} (start={task.start_time} - arrival={task.arrival_time})\n")
 
             duration_list.append(task.duration)
+            response_time_list.append(response_time)
 
         duration_numpy = np.array(duration_list)
         avg_duration = np.mean(duration_numpy)
         var_duration = np.var(duration_numpy)
 
-        f.write(f"\nAverage Task Duration: {avg_duration}, Variance: {var_duration}\n") 
+        f.write(f"\n[turn around time] Average : {avg_duration}, Variance: {var_duration}\n") 
+
+        response_time_numpy = np.array(response_time_list)
+        avg_response_time = np.mean(response_time_numpy)
+        var_response_time = np.var(response_time_numpy) 
+        f.write(f"[response time] Average : {avg_response_time}, Variance: {var_response_time}\n")
    
 
 if __name__ == "__main__":
