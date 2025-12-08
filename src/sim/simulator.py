@@ -2,12 +2,15 @@ import simpy
 from typing import List
 import numpy as np
 
-from src.sim.scheduler.base_scheduler import BaseScheduler
-from src.sim.scheduler.round_robin_scheduler import RoundRobinScheduler
-from src.sim.processor.base_processor import BaseProcessor
-from src.sim.task.base_task import BaseTask
-from src.sim.task.task_factory import TaskFactory
-from src.utils.logging import create_logger 
+# update a little bit with import path...
+from sim.scheduler.base_scheduler import BaseScheduler
+from sim.scheduler.round_robin_scheduler import RoundRobinScheduler
+from sim.processor.base_processor import BaseProcessor
+from sim.task.base_task import BaseTask
+from sim.task.task_factory import TaskFactory
+from utils.logging import create_logger
+
+from typing import Dict
 
 
 # create ENUM for different scheduling strategies
@@ -45,7 +48,8 @@ def task_arrival_generator(env: simpy.Environment, tasks: List[BaseTask], schedu
         yield env.timeout(task.arrival_time - env.now)
 
         # done waiting, now add the task to the scheduler
-        logger.info(f"Task {task.task_id} arrived at time {env.now}, with size {task.size}.", extra={"task": task, "env": env})
+        logger.info(f"Task {task.task_id} arrived at time {env.now}, with size {task.size}.", extra={
+                    "task": task, "env": env})
         scheduler.add_task(task)
 
 
@@ -66,12 +70,15 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
         f.write("<h1>Simulation Report</h1>\n")
 
         f.write("<h2>Task Factory Visualization</h2>\n")
-        f.write('<img src="task_factory_visualization.png" alt="Task Factory Visualization"><br>\n')
+        f.write(
+            '<img src="task_factory_visualization.png" alt="Task Factory Visualization"><br>\n')
 
-        f.write(f"<h2>Scheduler {scheduling_strategy} Processor Timelines</h2>\n")
+        f.write(
+            f"<h2>Scheduler {scheduling_strategy} Processor Timelines</h2>\n")
         for i in range(n_processors):
             f.write(f'<h3>Processor {i} Timeline</h3>\n')
-            f.write(f'<img src="processor_{i}_timeline_{extra_args}.png" alt="Processor {i} Timeline"><br>\n')
+            f.write(
+                f'<img src="processor_{i}_timeline_{extra_args}.png" alt="Processor {i} Timeline"><br>\n')
 
         if WRITE_ANALYSIS:
             f.write("<h2>Analysis Results</h2>\n")
@@ -85,7 +92,7 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
             f.write("<pre>\n")
             with open(f"{output_dir}simulation_{extra_args}.log", "r") as log_file:
                 f.write(log_file.read())
-            f.write("</pre>\n") 
+            f.write("</pre>\n")
 
             f.write("</body></html>\n")
 
@@ -102,16 +109,16 @@ def calculate_energy_consumption(time, frequency):
 
         Power = I_leakage * V + C * V^2 * f
               = I_leakage * k * f + C * (k * f)^2 * f
-        
+
         Energy = Power * time
                = [I_leakage * k * f + C * (k * f)^2] * f * (N / f)
                = [I_leakage * k * f + C * (k * f)^2] * N
     '''
-    k = 0.2 / 1e9           # V/GHz -> V/Hz 
-    C = 1e-9                # capacitance (F) 
-    I_leakage = 3e-2        # leakage current (A) 
+    k = 0.2 / 1e9           # V/GHz -> V/Hz
+    C = 1e-9                # capacitance (F)
+    I_leakage = 3e-2        # leakage current (A)
 
-    time = time / 1e9       # convert ns to s 
+    time = time / 1e9       # convert ns to s
     frequency *= 1e9        # convert GHz to Hz
 
     V = k * frequency
@@ -142,12 +149,15 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
             response_time = task.start_time - task.arrival_time
 
             # TODO: [extension] variable frequency scaling
-            energy = calculate_energy_consumption(task.size/frequency, frequency)
+            energy = calculate_energy_consumption(
+                task.size/frequency, frequency)
 
             if WRITE_SINGLE_TASK_ANALYSIS:
-                f.write(f"[Task {task.task_id}] turn around time = {task.duration} (finish={task.finish_time} - arrival={task.arrival_time}) \n \t total task size = {task.size}, \n")
-                        
-                f.write(f"\t response time = {response_time} (start={task.start_time} - arrival={task.arrival_time})\n")
+                f.write(
+                    f"[Task {task.task_id}] turn around time = {task.duration} (finish={task.finish_time} - arrival={task.arrival_time}) \n \t total task size = {task.size}, \n")
+
+                f.write(
+                    f"\t response time = {response_time} (start={task.start_time} - arrival={task.arrival_time})\n")
 
                 f.write(f"\t energy consumption = {energy} J\n")
 
@@ -159,37 +169,113 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
         avg_duration = np.mean(duration_numpy)
         var_duration = np.var(duration_numpy)
 
-        f.write(f"\n[turn around time] Average : {avg_duration}, Variance: {var_duration}\n") 
+        f.write(
+            f"\n[turn around time] Average : {avg_duration}, Variance: {var_duration}\n")
 
         response_time_numpy = np.array(response_time_list)
         avg_response_time = np.mean(response_time_numpy)
-        var_response_time = np.var(response_time_numpy) 
-        f.write(f"[response time] Average : {avg_response_time}, Variance: {var_response_time}\n")
+        var_response_time = np.var(response_time_numpy)
+        f.write(
+            f"[response time] Average : {avg_response_time}, Variance: {var_response_time}\n")
 
         energy_numpy = np.array(energy_list)
         avg_energy = np.mean(energy_numpy)
         var_energy = np.var(energy_numpy)
-        f.write(f"[energy consumption] Average : {avg_energy} J, Variance: {var_energy} J\n")
+        f.write(
+            f"[energy consumption] Average : {avg_energy} J, Variance: {var_energy} J\n")
 
-   
+
+def run_simulation(env_type: str, freq: float, **args) -> Dict[str, float]:
+    """
+    Main interface for running scheduling task simulation.
+
+    Args:
+        env_type (str): Type of the simulation environment ("FCFS" or "ROUND_ROBIN"). 
+        freq (float): Frequency of CPU processor (GHz).
+        **args: Other simulation arguments, including 'quantum' for ROUND_ROBIN.
+    Return:
+        Dict[str, float]: Performance results {"avg_energy", "avg_duration"}.
+    """
+
+    VALID_ENV = {
+        "FCFS": SchedulingStrategy.FCFS,
+        "ROUND_ROBIN": SchedulingStrategy.ROUND_ROBIN
+    }
+
+    assert env_type in VALID_ENV.keys(
+    ), f"Environment '{env_type}' is not supported! "
+
+    # initialize params
+    t_simulation_end = args.get('t_simulation_end', 40)
+    n_tasks = args.get('n_tasks', 10)
+    n_processors = args.get('n_processors', 1)
+
+    env = simpy.Environment()
+    task_factory = TaskFactory(n_tasks=n_tasks)
+    tasks_list = task_factory.create_tasks()
+
+    # initialize processor
+    processors = [
+        BaseProcessor(env, processor_id=i, logging=logging, frequency=freq)
+        for i in range(n_processors)
+    ]
+
+    # initialize scheduler
+    if env_type == "FCFS":
+        scheduler = BaseScheduler(env, processors, logging=logging)
+
+    elif env_type == "ROUND_ROBIN":
+        quantum = args.get('quantum')
+        if quantum is None:
+            raise ValueError(
+                "Environment ROUND_ROBIN requires the 'quantum' argument in **args.")
+
+        scheduler = RoundRobinScheduler(
+            env, processors, logging=logging, quantum=quantum)
+
+    # run simulation
+    for processor in processors:
+        processor.scheduler = scheduler
+    env.process(task_arrival_generator(env, tasks_list, scheduler))
+    env.run(until=t_simulation_end)
+
+    duration_list = []
+    energy_list = []
+
+    for task in tasks_list:
+        # task.size/freq = execution time
+        energy = calculate_energy_consumption(task.size / freq, freq)
+
+        duration_list.append(task.duration)
+        energy_list.append(energy)
+
+    # Return the metric for Optuna Objective func
+    return {
+        "avg_energy": np.mean(energy_list),
+        "avg_duration": np.mean(duration_list)
+    }
+
 
 if __name__ == "__main__":
-    
+
     env = simpy.Environment()
     logger.info("Simulator environment created.", extra={"env": env})
 
     task_factory = TaskFactory(n_tasks=n_tasks)
     tasks_list = task_factory.create_tasks()
     task_factory.visualize_tasks()
-    logger.info(f"Created {len(tasks_list)} tasks.", extra={"tasks": tasks_list})
+    logger.info(f"Created {len(tasks_list)} tasks.",
+                extra={"tasks": tasks_list})
 
-    processors = [BaseProcessor(env, processor_id=i, logging=logging, frequency=frequency) for i in range(n_processors)]
+    processors = [BaseProcessor(
+        env, processor_id=i, logging=logging, frequency=frequency) for i in range(n_processors)]
 
     # assign scheduler based on the selected strategy
     if scheduling_strategy == SchedulingStrategy.FCFS:
         scheduler = BaseScheduler(env, processors, logging=logging)
     elif scheduling_strategy == SchedulingStrategy.ROUND_ROBIN:
-        scheduler = RoundRobinScheduler(env, processors, logging=logging, quantum=quantum)
+        scheduler = RoundRobinScheduler(
+            env, processors, logging=logging, quantum=quantum)
 
     for processor in processors:
         processor.scheduler = scheduler  # link back the scheduler to the processor
@@ -198,13 +284,12 @@ if __name__ == "__main__":
     env.process(task_arrival_generator(env, tasks_list, scheduler))
 
     env.run(until=t_simulation_end)
- 
+
     print("Simulation completed.")
 
     for processor in processors:
         processor.visualization_plot(extra_args=extra_args)
-    
+
     write_analysis_file()
 
     write_results_html(extra_args=extra_args)
-

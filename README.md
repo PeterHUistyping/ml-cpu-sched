@@ -10,7 +10,11 @@
 ```shell
 conda create -n ml-sched python=3.10 -y
 conda activate ml-sched
+pip install hydra-core
+pip install botorch
 pip install optuna
+pip install optuna-integration
+pip install simpy
 pip install seaborn
 ```
 

@@ -1,0 +1,7 @@
+# configs/config_rr.yaml
+
+algo_name: RoundRobin
+
+n_trials: 50
+
+output_path: "../outputs/"
