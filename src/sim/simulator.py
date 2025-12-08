@@ -100,10 +100,14 @@ if __name__ == "__main__":
 
     for processor in processors:
         processor.visualization_plot(scheduling_strategy)
+    
+    total_duration = 0
+    for task in tasks_list:
+        logger.info(f"Task {task.task_id} - Arrival: {task.arrival_time}, Finish: {task.finish_time}, Size: {task.size}, Duration: {task.duration}", extra={"task": task, "env": env})
+
+        total_duration += task.duration
+    
+    logger.info(f"Average Task Duration: {total_duration / len(tasks_list)}", extra={"env": env})
 
     write_results_html()
 
-    
-
-
-    

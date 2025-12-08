@@ -35,6 +35,7 @@ class BaseScheduler(ABC):
             self.queue.append(task)
             self.logger.info(f"Task {task.task_id} quantum expired at time {self.env.now}, re-adding to queue with remaining size {task.remaining_size}.", extra={"task": task, "env": self.env})
         else:
+            task.finish_time = self.env.now
             self.logger.info(f"Task {task.task_id} completed at time {self.env.now}.", extra={"task": task, "env": self.env})
 
         self.schedule()  # Resource is free, attempt to schedule
