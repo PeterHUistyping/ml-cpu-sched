@@ -6,7 +6,6 @@ import random
 import matplotlib.pyplot as plt
 
 from src.sim.task.base_task import BaseTask
-from src.utils.logging import *
 from src.utils.plot_style import set_plot_style 
 
 
@@ -18,6 +17,7 @@ class BaseProcessor(ABC):
         self,
         env: simpy.Environment,
         processor_id: int,
+        logging,
         frequency: float = 1.0,
     ):
         self.env = env

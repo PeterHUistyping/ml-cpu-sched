@@ -6,13 +6,12 @@ import simpy
 from src.sim.task.base_task import BaseTask
 from src.sim.processor.base_processor import BaseProcessor
 from src.sim.scheduler.base_scheduler import BaseScheduler
-from src.utils.logging import *
-logger = logging.getLogger("scheduler")
 
 
 class RoundRobinScheduler(BaseScheduler):
-    def __init__(self, env: simpy.Environment, resources: List[BaseProcessor], quantum: float = 1.0):
-        super().__init__(env, resources)
+    def __init__(self, env: simpy.Environment, resources: List[BaseProcessor], logging, quantum: float = 1.0):
+        super().__init__(env, resources, logging=logging)
+        self.logger = logging.getLogger("RR scheduler")
         self.quantum = quantum  # Time quantum for round robin scheduling
         self.logger.info(f"Round Robin Scheduler initialized with quantum = {self.quantum}.", extra={"env": self.env})
 

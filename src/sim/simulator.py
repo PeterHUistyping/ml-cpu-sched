@@ -7,8 +7,7 @@ from src.sim.scheduler.round_robin_scheduler import RoundRobinScheduler
 from src.sim.processor.base_processor import BaseProcessor
 from src.sim.task.base_task import BaseTask
 from src.sim.task.task_factory import TaskFactory
-from src.utils.logging import *
-logger = logging.getLogger("simulator")
+from src.utils.logging import create_logger 
 
 
 # create ENUM for different scheduling strategies
@@ -23,7 +22,16 @@ n_tasks = 10
 n_processors = 1
 t_simulation_end = 40
 quantum = 1.0  # time quantum for Round Robin
+
+# determine extra args for filename
 extra_args = ''
+
+if scheduling_strategy == SchedulingStrategy.ROUND_ROBIN:
+    extra_args = f"{scheduling_strategy}_{quantum}"
+
+# create logger
+logging = create_logger(extra_args=extra_args)
+logger = logging.getLogger("simulator")
 
 
 def task_arrival_generator(env: simpy.Environment, tasks: List[BaseTask], scheduler: RoundRobinScheduler):
@@ -52,7 +60,7 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
 
         # append simulation.log contents
     '''
-    with open(f"{output_dir}sim_report_{scheduling_strategy}{extra_args}.html", "w") as f:
+    with open(f"{output_dir}sim_report_{extra_args}.html", "w") as f:
         f.write(f"<html><head><title>{scheduling_strategy} Sim.</title></head><body>\n")
         f.write("<h1>Simulation Report</h1>\n")
 
@@ -67,14 +75,14 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
         if WRITE_ANALYSIS:
             f.write("<h2>Analysis Results</h2>\n")
             f.write("<pre>\n")
-            with open(f"{output_dir}analysis_{scheduling_strategy}{extra_args}.txt", "r") as analysis_file:
+            with open(f"{output_dir}analysis_{extra_args}.txt", "r") as analysis_file:
                 f.write(analysis_file.read())
             f.write("</pre>\n")
 
         if WRITE_LOG:
             f.write("<h2>Simulation Log</h2>\n")
             f.write("<pre>\n")
-            with open(f"{output_dir}simulation.log", "r") as log_file:
+            with open(f"{output_dir}simulation_{extra_args}.log", "r") as log_file:
                 f.write(log_file.read())
             f.write("</pre>\n") 
 
@@ -86,7 +94,7 @@ def write_analysis_file(output_dir="outputs/"):
         Write analysis results into a text file.
     '''
     duration_list = []
-    with open(f"{output_dir}analysis_{scheduling_strategy}{extra_args}.txt", "w") as f:
+    with open(f"{output_dir}analysis_{extra_args}.txt", "w") as f:
 
         for task in tasks_list:
             f.write(f"Task {task.task_id}: Duration = {task.duration} (Finish Time={task.finish_time} - Arrival Time={task.arrival_time}) | Total Size = {task.size}, \n")
@@ -110,14 +118,13 @@ if __name__ == "__main__":
     task_factory.visualize_tasks()
     logger.info(f"Created {len(tasks_list)} tasks.", extra={"tasks": tasks_list})
 
-    processors = [BaseProcessor(env, processor_id=i, frequency=1.0) for i in range(n_processors)]
+    processors = [BaseProcessor(env, processor_id=i, logging=logging, frequency=1.0) for i in range(n_processors)]
 
     # assign scheduler based on the selected strategy
     if scheduling_strategy == SchedulingStrategy.FCFS:
-        scheduler = BaseScheduler(env, processors)
+        scheduler = BaseScheduler(env, processors, logging=logging)
     elif scheduling_strategy == SchedulingStrategy.ROUND_ROBIN:
-        scheduler = RoundRobinScheduler(env, processors, quantum=quantum)
-        extra_args = f"_{quantum}"
+        scheduler = RoundRobinScheduler(env, processors, logging=logging, quantum=quantum)
 
     for processor in processors:
         processor.scheduler = scheduler  # link back the scheduler to the processor

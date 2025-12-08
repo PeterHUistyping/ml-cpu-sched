@@ -5,14 +5,13 @@ import simpy
 
 from src.sim.task.base_task import BaseTask
 from src.sim.processor.base_processor import BaseProcessor
-from src.utils.logging import *
 
 
 class BaseScheduler(ABC):
     '''
         Default first come first serve scheduler implementation, without interruptions.
     '''
-    def __init__(self, env: simpy.Environment, resources: List[BaseProcessor]):
+    def __init__(self, env: simpy.Environment, resources: List[BaseProcessor], logging):
         self.env = env
         self.resources = resources
         self.queue = []  # type: List[BaseTask]
