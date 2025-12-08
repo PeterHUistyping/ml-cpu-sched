@@ -6,7 +6,6 @@ import simpy
 from src.sim.task.base_task import BaseTask
 from src.sim.processor.base_processor import BaseProcessor
 from src.utils.logging import *
-logger = logging.getLogger("scheduler")
 
 
 class BaseScheduler(ABC):
@@ -17,17 +16,27 @@ class BaseScheduler(ABC):
         self.env = env
         self.resources = resources
         self.queue = []  # type: List[BaseTask]
+        self.logger = logging.getLogger("scheduler")
 
 
     def add_task(self, task: BaseTask):
         """External method to add a task to the system."""
-        logger.info(f"Task {task.task_id} added to scheduler queue at time {self.env.now}.", extra={"task": task, "env": self.env})
+        self.logger.info(f"Task {task.task_id} added to scheduler queue at time {self.env.now}.", extra={"task": task, "env": self.env})
         self.queue.append(task)
         self.schedule()  # Attempt to schedule whenever a new task arrives
 
 
-    def on_resource_free(self, resource: BaseProcessor):
+    def on_resource_free(self, resource: BaseProcessor, task):
         """Triggered when a resource becomes free."""
+
+        # After scheduling, finish task after quantum/interrupt or when done
+        # re-add the task to the end of the queue if it's not finished
+        if task.remaining_size > 0:
+            self.queue.append(task)
+            self.logger.info(f"Task {task.task_id} quantum expired at time {self.env.now}, re-adding to queue with remaining size {task.remaining_size}.", extra={"task": task, "env": self.env})
+        else:
+            self.logger.info(f"Task {task.task_id} completed at time {self.env.now}.", extra={"task": task, "env": self.env})
+
         self.schedule()  # Resource is free, attempt to schedule
 
 
@@ -76,7 +85,7 @@ class BaseScheduler(ABC):
 
             # 3. Select resource
             resource = self.select_resource(task)
-            if not resource:
+            if resource is None:
                 break
 
             # 4. Remove from queue and start execution
@@ -85,5 +94,5 @@ class BaseScheduler(ABC):
 
             # Mark this resource as booked
             available_resources.remove(resource)
-            logger.info(f"Scheduling Task {task.task_id} on Resource {resource.id} at time {self.env.now}.", extra={"task": task, "resource": resource, "env": self.env})
+            self.logger.info(f"Scheduling Task {task.task_id} on Resource {resource.id} at time {self.env.now}.", extra={"task": task, "resource": resource, "env": self.env})
             self.post_schedule_hook(task, resource)
