@@ -1,4 +1,6 @@
 from src.sim.task.base_task import BaseTask
+import matplotlib.pyplot as plt
+from src.utils.plot_style import set_plot_style
 import random
 
 class TaskFactory:
@@ -34,7 +36,7 @@ class TaskFactory:
         '''
             Plot the task duration in 1D plot, where x axis is time from start to end, and each task is represented as a rectangle starting with arrival_time and width=size.
         '''
-        import matplotlib.pyplot as plt
+        set_plot_style()
         arrival_times = [task.arrival_time for task in self.tasks]
         sizes = [task.size for task in self.tasks]
         plt.figure(figsize=(10, 6))
@@ -43,7 +45,7 @@ class TaskFactory:
             plt.text(task.arrival_time + task.size / 2, i, f'Task {task.task_id}', va='center', ha='center', color='black')
         plt.xlabel('Time')
         plt.ylabel('Tasks')
-        plt.title('Task Visualization')
+        plt.title('Tasks Visualization')
         plt.yticks(range(len(self.tasks)), [f'Task {task.task_id}' for task in self.tasks])
         plt.tight_layout()
         plt.savefig(f'{output_dir}/task_factory_visualization.png')
