@@ -28,6 +28,8 @@ extra_args = ''
 
 if scheduling_strategy == SchedulingStrategy.ROUND_ROBIN:
     extra_args = f"{scheduling_strategy}_{quantum}"
+else:
+    extra_args = f"{scheduling_strategy}"
 
 # create logger
 logging = create_logger(extra_args=extra_args)
