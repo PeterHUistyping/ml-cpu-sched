@@ -55,7 +55,9 @@ class TaskFactory:
         sizes = [task.size for task in self.tasks]
         plt.figure(figsize=(10, 6))
         for i, task in enumerate(self.tasks):
-            plt.barh(y=i, width=task.size, left=task.arrival_time, height=0.4, align='center', alpha=0.7)
+            color = plt.cm.tab20(task.task_id % 20)
+
+            plt.barh(y=i, width=task.size, left=task.arrival_time, height=0.4, align='center', alpha=0.7, color=color) 
             plt.text(task.arrival_time + task.size / 2, i, f'Task {task.task_id}', va='center', ha='center', color='black')
         plt.xlabel('Time')
         plt.ylabel('Tasks')
