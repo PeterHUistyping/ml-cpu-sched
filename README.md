@@ -14,11 +14,12 @@ pip install hydra-core
 pip install botorch
 pip install optuna
 pip install optuna-integration
+pip install optuna-dashboard
 pip install simpy
 pip install seaborn
 ```
 
-## Run 
+## Run Simulation
 
 To run the simulation, execute the following command with the desired global settings,
 
@@ -29,6 +30,26 @@ python src/sim/simulator.py
 ```
 
 > The simulation results will be saved in the `outputs/` directory, including the `sim_report_<scheduling_strategy>.html` reports (visualizations and detailed logs).
+
+## Run BO and Analysis
+
+To run the bayesian optimization, use the script from `scripts/run_cpu.sh`.
+
+The default search space is defined as follows:
+```python
+freq: float = range(0.8, 3.5)
+scheduling_strategy: str = ["FCFS", "ROUND_ROBIN"]
+quantum: float = range(0.5 - 5.0)
+
+cost_func: Callable = evaluate_inverse_log_loss
+beta: float = range(0.5, 5.0)
+gamma: float = range(0.5, 5.0)
+```
+
+After the optimization is finished, use `optuna-dashboard` to check the results with corresponding analysis:
+```shell
+optuna-dashboard sqlite:///../outputs/GP_BO_RoundRobin_results.db
+```
 
 ## Code structure
 - `src/sim/`

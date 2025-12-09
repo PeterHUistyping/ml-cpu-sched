@@ -25,7 +25,7 @@ class OptimizerRunner:
         Args:
             metric_func (Callable): Metric func to calculate cost. 
             n_trials (int): Times of BO.
-            study_name (str): Optuna Study 的名称。
+            study_name (str): Name of Optuna Study. 
             storage_path (str): Database path to store the results. 
         """
         self.metric_func = metric_func

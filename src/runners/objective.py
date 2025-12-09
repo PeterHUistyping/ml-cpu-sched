@@ -19,7 +19,6 @@ def objective(
     # Process with params
     args = {}
     if env_type == "ROUND_ROBIN":
-        # 仅在 RR 被选中时采样 quantum
         args['quantum'] = trial.suggest_float("quantum_ms", 0.5, 5.0)
 
     results = run_simulation(env_type=env_type, freq=freq, **args)

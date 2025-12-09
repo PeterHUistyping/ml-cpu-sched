@@ -8,14 +8,14 @@ from utils.metrics_utils import evaluate_inverse_log_loss
 from runners.bo_runner import OptimizerRunner
 
 
-@hydra.main(version_base=None, config_path="../configs", config_name="config_rr")
+@hydra.main(version_base=None, config_path="../configs", config_name="config_cpu")
 def main(args: DictConfig):
     n_trials = args.get("n_trials", 50)
     output_path = Path(args.get("output_path"))
     algo_name = args.get("algo_name", "RoundRobin")
     experiment_name = f"GP_BO_{algo_name}"
 
-    db_filename = f"../outputs/{experiment_name}_results.db"
+    db_filename = f"outputs/{experiment_name}_results.db"
     db_path = Path.cwd() / db_filename
     db_path.parent.mkdir(parents=True, exist_ok=True)
     storage_url = f"sqlite:///{db_path.resolve()}"

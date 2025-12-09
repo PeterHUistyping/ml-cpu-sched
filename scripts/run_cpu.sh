@@ -13,8 +13,8 @@ fi
 cd $PROJ_ROOT
 conda activate ml-sched
 
-python src/main.py --config-name=config_rr \
-    n_trials=1
+python src/main.py --config-name=config_cpu \
+    n_trials=100
 
 cd $SCRIPT_DIR
 conda deactivate
