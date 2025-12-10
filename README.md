@@ -24,7 +24,7 @@ pip install seaborn
 To run the simulation, execute the following command with the desired global settings,
 
 ```shell
-export PYTHONPATH="$(pwd):$PYTHONPATH"
+export PYTHONPATH="$(pwd)/src:$PYTHONPATH"
 
 python src/sim/simulator.py
 ```
@@ -48,7 +48,7 @@ gamma: float = range(0.5, 5.0)
 
 After the optimization is finished, use `optuna-dashboard` to check the results with corresponding analysis:
 ```shell
-optuna-dashboard sqlite:///../outputs/GP_BO_RoundRobin_results.db
+optuna-dashboard sqlite:///outputs/GP_BO_RoundRobin_results.db
 ```
 
 ## Code structure
