@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from utils.plot_style import set_plot_style
 
 
@@ -50,7 +52,7 @@ if __name__ == "__main__":
         times[i], frequencies[i], is_idle=True) for i in range(len(frequencies))]
     active_energies = [energies[i] - idle_energies[i]
                        for i in range(len(frequencies))]
-    import matplotlib.pyplot as plt
+
     plt.plot(frequencies, energies, marker='o', label="Total energy consumption")
     plt.plot(frequencies, idle_energies, marker='^', label="Idle energy consumption")
     plt.plot(frequencies, active_energies, marker='d', label="Active energy consumption")
@@ -58,7 +60,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.xlabel('Frequency (GHz)')
     plt.ylabel('Energy Consumption (Joules)')
-    plt.title('Energy Consumption vs Frequency')
+    # plt.title('Energy Consumption vs Frequency')
     plt.tight_layout()
     plt.savefig('outputs/energy_consumption_vs_frequency.png', dpi=300)
     plt.close()
