@@ -22,13 +22,17 @@ class SchedulingStrategy:
 # scheduling_strategy = SchedulingStrategy.FCFS
 scheduling_strategy = SchedulingStrategy.ROUND_ROBIN
 n_tasks = 10
-n_processors = 1
+n_processor_types = 3                             # little, medium, big 
+n_processors_per_type = [2] * n_processor_types   # number of processors for each type
+# or use [2, 2, 2] 
+n_processors = sum(n_processors_per_type)
 t_simulation_end = 40
-frequency = 1.0     # processor frequency (GHz)
+# Processor frequency: here we assume the frequency is fixed along the task execution for simplicity.
+frequencies = [0.5, 1.0, 2.0]  # processor frequency (GHz) for little, medium, big
 quantum = 1.0       # time quantum for Round Robin (ms)
 
 # determine extra args for filename
-extra_args = f"{scheduling_strategy}_freq={frequency}"
+extra_args = f"{scheduling_strategy}_freq={frequencies}"
 
 if scheduling_strategy == SchedulingStrategy.ROUND_ROBIN:
     extra_args += f"_quantum={quantum}"
@@ -74,9 +78,11 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
             '<img src="task_factory_visualization.png" alt="Task Factory Visualization"><br>\n')
 
         f.write(
-            f"<h2>Scheduler {scheduling_strategy} Processor Timelines</h2>\n")
+            f"<h2>Scheduler {scheduling_strategy} Processors Timelines</h2>\n")
         for i in range(n_processors):
-            f.write(f'<h3>Processor {i} Timeline</h3>\n')
+            f.write(f'<h3>Processor {i} Timeline ({processors[i].frequency} GHz)</h3>\n')
+            # write processor[i].end_time, processors[i].active_time, processors[i].get_idle_energy()
+            f.write(f"<p>Idle Energy Consumption: {processors[i].get_idle_energy()} J, [End Time: {processors[i].end_time} s, Active Time: {processors[i].active_time} s, Idle Time: {processors[i].idle_time} s].</p>\n")
             f.write(
                 f'<img src="processor_{i}_timeline_{extra_args}.png" alt="Processor {i} Timeline"><br>\n')
 
@@ -97,39 +103,17 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
             f.write("</body></html>\n")
 
 
-def calculate_energy_consumption(time, frequency):
+def get_mean_and_variance(data: List[float]) -> Dict[str, float]:
     '''
-        param: time, frequency (GHz)
+        parameters:
+            data: list of numbers [float]
 
-        Power = P_static + P_dynamic
-        P_dynamic = C * V^2 * f 
-        P_static = I_leakage * V
-
-        V = k * f   (simplified voltage-frequency scaling)
-
-        Power = I_leakage * V + C * V^2 * f
-              = I_leakage * k * f + C * (k * f)^2 * f
-
-        Energy = Power * time
-               = [I_leakage * k * f + C * (k * f)^2] * f * (N / f)
-               = [I_leakage * k * f + C * (k * f)^2] * N
+        Calculate mean and variance of a list of numbers.
     '''
-    k = 0.2 / 1e9           # V/GHz -> V/Hz
-    C = 1e-9                # capacitance (F)
-    I_leakage = 3e-2        # leakage current (A)
-
-    time = time / 1e9       # convert ns to s
-    frequency *= 1e9        # convert GHz to Hz
-
-    V = k * frequency
-    P_static = I_leakage * V
-    P_dynamic = C * (V ** 2) * frequency
-
-    Power = P_static + P_dynamic  # in Watts
-
-    Energy = Power * time  # in Joules
-
-    return Energy
+    data_numpy = np.array(data)
+    mean = np.mean(data_numpy)
+    variance = np.var(data_numpy)
+    return mean, variance
 
 
 def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False):
@@ -140,6 +124,8 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
     duration_list = []
     response_time_list = []
     energy_list = []
+    idle_energy_list = []
+    active_energy_list = []
     with open(f"{output_dir}analysis_{extra_args}.txt", "w") as f:
 
         f.write(f"Simulation Analysis Results for {extra_args}\n")
@@ -148,10 +134,6 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
 
             response_time = task.start_time - task.arrival_time
 
-            # TODO: [extension] variable frequency scaling
-            energy = calculate_energy_consumption(
-                task.size/frequency, frequency)
-
             if WRITE_SINGLE_TASK_ANALYSIS:
                 f.write(
                     f"[Task {task.task_id}] turn around time = {task.duration} (finish={task.finish_time} - arrival={task.arrival_time}) \n \t total task size = {task.size}, \n")
@@ -159,30 +141,37 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
                 f.write(
                     f"\t response time = {response_time} (start={task.start_time} - arrival={task.arrival_time})\n")
 
-                f.write(f"\t energy consumption = {energy} J\n")
+                f.write(f"\t energy consumption = {task.energy} J\n")
 
             duration_list.append(task.duration)
             response_time_list.append(response_time)
-            energy_list.append(energy)
+            active_energy_list.append(task.energy)
+        for processor in processors:
+            idle_energy = processor.get_idle_energy()
+            idle_energy_list.append(idle_energy)
 
-        duration_numpy = np.array(duration_list)
-        avg_duration = np.mean(duration_numpy)
-        var_duration = np.var(duration_numpy)
+        avg_duration, var_duration = get_mean_and_variance(duration_list)
 
         f.write(
             f"\n[turn around time] Average : {avg_duration}, Variance: {var_duration}\n")
 
-        response_time_numpy = np.array(response_time_list)
-        avg_response_time = np.mean(response_time_numpy)
-        var_response_time = np.var(response_time_numpy)
+        avg_response_time, var_response_time = get_mean_and_variance(response_time_list)
         f.write(
             f"[response time] Average : {avg_response_time}, Variance: {var_response_time}\n")
-
-        energy_numpy = np.array(energy_list)
-        avg_energy = np.mean(energy_numpy)
-        var_energy = np.var(energy_numpy)
+        
+        energy_list = [a + b for a, b in zip(active_energy_list, idle_energy_list)]
+        avg_energy, var_energy = get_mean_and_variance(energy_list)
         f.write(
             f"[energy consumption] Average : {avg_energy} J, Variance: {var_energy} J\n")
+        
+        # also write active and idle energy separately
+        avg_active_energy, var_active_energy = get_mean_and_variance(active_energy_list)
+        f.write(
+            f"[active energy consumption] Average : {avg_active_energy} J, Variance: {var_active_energy} J\n")
+        
+        avg_idle_energy, var_idle_energy = get_mean_and_variance(idle_energy_list)
+        f.write(
+            f"[idle energy consumption] Average : {avg_idle_energy} J, Variance: {var_idle_energy} J\n")
 
 
 def run_simulation(env_type: str, freq: float, **args) -> Dict[str, float]:
@@ -241,14 +230,18 @@ def run_simulation(env_type: str, freq: float, **args) -> Dict[str, float]:
 
     duration_list = []
     energy_list = []
+    active_energy_list = []
+    idle_energy_list = []
 
     for task in tasks_list:
-        # task.size/freq = execution time
-        energy = calculate_energy_consumption(task.size / freq, freq)
-
         duration_list.append(task.duration)
-        energy_list.append(energy)
+        active_energy_list.append(task.energy)
+    
+    for processor in processors:
+        idle_energy = processor.get_idle_energy()
+        idle_energy_list.append(idle_energy)
 
+    energy_list = [a + b for a, b in zip(active_energy_list, idle_energy_list)]
     # Return the metric for Optuna Objective func
     return {
         "avg_energy": np.mean(energy_list),
@@ -267,8 +260,14 @@ if __name__ == "__main__":
     logger.info(f"Created {len(tasks_list)} tasks.",
                 extra={"tasks": tasks_list})
 
-    processors = [BaseProcessor(
-        env, processor_id=i, logging=logging, frequency=frequency) for i in range(n_processors)]
+
+    processors = []
+    processor_id = 0
+    for p_type in range(n_processor_types):
+        for _ in range(n_processors_per_type[p_type]):
+            processors.append(BaseProcessor(
+                env, processor_id=processor_id, logging=logging, frequency=frequencies[p_type]))
+            processor_id += 1
 
     # assign scheduler based on the selected strategy
     if scheduling_strategy == SchedulingStrategy.FCFS:

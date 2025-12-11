@@ -16,6 +16,7 @@ class BaseTask:
     size: float
     start_time: float = -1 # time when task starts processing
     remaining_size: float = 0.0
+    energy: float = 0.0
 
     # Record deadline or finish time if applicable, else None
     finish_time: Optional[float] = None
