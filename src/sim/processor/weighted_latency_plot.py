@@ -25,10 +25,18 @@ if __name__ == "__main__":
         for j in range(X.shape[1]):
             time = N / X[i, j] * 1e3  # convert s to ns
             Z[i, j] = weighted_time_by_priority(time, Y[i, j])
-    ax.plot_surface(X, Y, Z, cmap='viridis')
+
+    m = plt.cm.ScalarMappable(cmap='viridis')
+    m.set_array(Z)
+    ax.plot_surface(X, Y, Z, cmap = m.cmap, facecolors=m.to_rgba(Z), rstride=1, cstride=1, antialiased=True, shade=False)
     ax.set_xlabel('Frequency (GHz)')
     ax.set_ylabel('Priority')
-    ax.set_zlabel('Weighted Latency (ns)')
+    # ax.set_zlabel('Weighted Latency (ns)')
+
+    # add color bar to z label
+    cbar = plt.colorbar(m, pad=0.1, ax=ax, fraction=0.02)
+    cbar.set_label('Weighted Latency (ns)')
+    
     plt.tight_layout()
     plt.savefig('outputs/weighted_latency_by_priority_frequency.png', dpi=300)
 
