@@ -7,6 +7,7 @@
 
 ## Installation
 
+Conda environment setup:
 ```shell
 conda create -n ml-sched python=3.10 -y
 conda activate ml-sched
@@ -17,6 +18,13 @@ pip install optuna-integration
 pip install optuna-dashboard
 pip install simpy
 pip install seaborn
+```
+
+Pip environment setup:
+```shell
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements.txt
 ```
 
 ## Run Simulation
