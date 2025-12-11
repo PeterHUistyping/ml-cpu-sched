@@ -167,11 +167,11 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
         # also write active and idle energy separately
         avg_active_energy, var_active_energy = get_mean_and_variance(active_energy_list)
         f.write(
-            f"[active energy consumption] Average : {avg_active_energy} J, Variance: {var_active_energy} J\n")
+            f"\t[active energy consumption] Average : {avg_active_energy} J, Variance: {var_active_energy} J\n")
         
         avg_idle_energy, var_idle_energy = get_mean_and_variance(idle_energy_list)
         f.write(
-            f"[idle energy consumption] Average : {avg_idle_energy} J, Variance: {var_idle_energy} J\n")
+            f"\t[idle energy consumption] Average : {avg_idle_energy} J, Variance: {var_idle_energy} J\n")
 
 
 def run_simulation(env_type: str, freq: float, **args) -> Dict[str, float]:
