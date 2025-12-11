@@ -14,7 +14,8 @@ class BaseTask:
     task_id: int
     arrival_time: float
     size: float
-    start_time: float = -1 # time when task starts processing
+    priority: int           # lower value means higher priority [e.g., 0 (highest), 1, 2]
+    start_time: float = -1  # time when task starts processing
     remaining_size: float = 0.0
     energy: float = 0.0
 

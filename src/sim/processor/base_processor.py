@@ -59,7 +59,7 @@ class BaseProcessor(ABC):
             task.start_time = start_time
 
         # Calculate how long it takes to process this task
-        self.logger.info(f"started processing Task {task.task_id} at time {start_time} with remaining size {task.remaining_size}.", extra={
+        self.logger.info(f"started processing Task {task.task_id} with priority {task.priority} at time {start_time} with remaining size {task.remaining_size}.", extra={
                          "task": task, "env": self.env, "processor": self})
 
         processing_time = task.remaining_size / self.frequency
