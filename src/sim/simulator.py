@@ -5,6 +5,7 @@ import numpy as np
 # update a little bit with import path...
 from sim.scheduler.base_scheduler import BaseScheduler
 from sim.scheduler.round_robin_scheduler import RoundRobinScheduler
+from sim.scheduler.priority_scheduler import PriorityScheduler
 from sim.processor.base_processor import BaseProcessor
 from sim.task.base_task import BaseTask
 from sim.task.task_factory import TaskFactory
@@ -17,16 +18,18 @@ from typing import Dict
 class SchedulingStrategy:
     FCFS = "FCFS"
     ROUND_ROBIN = "RR"
+    PRIORITY = "PRIORITY"
 
 
 # scheduling_strategy = SchedulingStrategy.FCFS
 scheduling_strategy = SchedulingStrategy.ROUND_ROBIN
+# scheduling_strategy = SchedulingStrategy.PRIORITY
 n_tasks = 10
 n_processor_types = 3                             # little, medium, big 
 n_processors_per_type = [2] * n_processor_types   # number of processors for each type
 # or use [2, 2, 2] 
 n_processors = sum(n_processors_per_type)
-t_simulation_end = 40
+t_simulation_end = 100
 # Processor frequency: here we assume the frequency is fixed along the task execution for simplicity.
 frequencies = [0.5, 1.0, 2.0]  # processor frequency (GHz) for little, medium, big
 quantum = 1.0       # time quantum for Round Robin (ms)
@@ -116,12 +119,22 @@ def get_mean_and_variance(data: List[float]) -> Dict[str, float]:
     return mean, variance
 
 
-def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False):
+def weighted_time_by_priority(time, priority):
+    '''
+        Calculate weighted time by priority.
+        Higher priority (lower value) gets higher weight, e.g. {0, 1, 2, ...} -> {1, 0.5, 0.33, ...}
+    '''
+    weight = 1 / ((priority + 1)**2)  # avoid division by zero
+    return time * weight
+
+
+def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=True):
     '''
         Write analysis results into a text file.
     '''
     # turn around time
     duration_list = []
+    weight_duration_list = []
     response_time_list = []
     energy_list = []
     idle_energy_list = []
@@ -133,17 +146,22 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
         for task in tasks_list:
 
             response_time = task.start_time - task.arrival_time
-
+            weighted_duration = weighted_time_by_priority(task.duration, task.priority)
+    
             if WRITE_SINGLE_TASK_ANALYSIS:
                 f.write(
                     f"[Task {task.task_id}] turn around time = {task.duration} (finish={task.finish_time} - arrival={task.arrival_time}) \n \t total task size = {task.size}, \n")
 
                 f.write(
                     f"\t response time = {response_time} (start={task.start_time} - arrival={task.arrival_time})\n")
+                
+                f.write(
+                    f"\t weighted turn around time by priority (priority={task.priority}) = {weighted_duration}\n")
 
                 f.write(f"\t energy consumption = {task.energy} J\n")
 
             duration_list.append(task.duration)
+            weight_duration_list.append(weighted_duration)
             response_time_list.append(response_time)
             active_energy_list.append(task.energy)
         for processor in processors:
@@ -159,6 +177,10 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
         f.write(
             f"[response time] Average : {avg_response_time}, Variance: {var_response_time}\n")
         
+        avg_weighted_duration, var_weighted_duration = get_mean_and_variance(weight_duration_list)
+        f.write(
+            f"[weighted turn around time by priority] Average : {avg_weighted_duration}, Variance: {var_weighted_duration}\n")
+        
         energy_list = [a + b for a, b in zip(active_energy_list, idle_energy_list)]
         avg_energy, var_energy = get_mean_and_variance(energy_list)
         f.write(
@@ -167,11 +189,11 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=False)
         # also write active and idle energy separately
         avg_active_energy, var_active_energy = get_mean_and_variance(active_energy_list)
         f.write(
-            f"[active energy consumption] Average : {avg_active_energy} J, Variance: {var_active_energy} J\n")
+            f"\t[active energy consumption] Average : {avg_active_energy} J, Variance: {var_active_energy} J\n")
         
         avg_idle_energy, var_idle_energy = get_mean_and_variance(idle_energy_list)
         f.write(
-            f"[idle energy consumption] Average : {avg_idle_energy} J, Variance: {var_idle_energy} J\n")
+            f"\t[idle energy consumption] Average : {avg_idle_energy} J, Variance: {var_idle_energy} J\n")
 
 
 def run_simulation(env_type: str, freq: float, **args) -> Dict[str, float]:
@@ -195,7 +217,7 @@ def run_simulation(env_type: str, freq: float, **args) -> Dict[str, float]:
     ), f"Environment '{env_type}' is not supported! "
 
     # initialize params
-    t_simulation_end = args.get('t_simulation_end', 40)
+    t_simulation_end = args.get('t_simulation_end', 100)
     n_tasks = args.get('n_tasks', 10)
     n_processors = args.get('n_processors', 1)
 
@@ -229,18 +251,27 @@ def run_simulation(env_type: str, freq: float, **args) -> Dict[str, float]:
     env.run(until=t_simulation_end)
 
     duration_list = []
+    weighted_duration_list = []
     energy_list = []
     active_energy_list = []
     idle_energy_list = []
 
     for task in tasks_list:
         duration_list.append(task.duration)
+
+        # weighted turn around time by priority
+        weighted_duration = weighted_time_by_priority(task.duration, task.priority)
+        weighted_duration_list.append(weighted_duration)
+
+        # energy consumption when core is active
         active_energy_list.append(task.energy)
     
     for processor in processors:
+        # energy consumption when core is idle
         idle_energy = processor.get_idle_energy()
         idle_energy_list.append(idle_energy)
 
+    # total energy consumption
     energy_list = [a + b for a, b in zip(active_energy_list, idle_energy_list)]
     # Return the metric for Optuna Objective func
     return {
@@ -275,6 +306,9 @@ if __name__ == "__main__":
     elif scheduling_strategy == SchedulingStrategy.ROUND_ROBIN:
         scheduler = RoundRobinScheduler(
             env, processors, logging=logging, quantum=quantum)
+    elif scheduling_strategy == SchedulingStrategy.PRIORITY:
+        scheduler = PriorityScheduler(
+            env, processors, logging=logging, quantum=quantum, USE_QUANTUM=True)
 
     for processor in processors:
         processor.scheduler = scheduler  # link back the scheduler to the processor
