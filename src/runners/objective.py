@@ -12,7 +12,8 @@ PROCESSOR_TYPES = ["little", "medium", "big"]
 def objective(
     trial: optuna.Trial,
     metric_func: Callable,
-    metric_params: Dict[str, float] = None
+    metric_params: Dict[str, float] = None,
+    **simulation_params
 ) -> float:
     """
     Optuna Objective Function for System Optimization.
@@ -55,10 +56,11 @@ def objective(
     env_type = trial.suggest_categorical(
         "scheduling_strategy", ["FCFS", "ROUND_ROBIN", "PRIORITY"])
 
-    sim_args = {}
-
+    trial_args = {}
     if env_type in ["ROUND_ROBIN", "PRIORITY"]:
-        sim_args['quantum'] = trial.suggest_float("quantum_ms", 2.0, 20.0)
+        trial_args['quantum'] = trial.suggest_float("quantum_ms", 0.5, 5.0)
+
+    final_args = {**trial_args, **simulation_params}
 
     # Run Simulation)
     try:
@@ -66,7 +68,7 @@ def objective(
             env_type=env_type,
             processor_freqs=processor_freqs,
             processor_counts=processor_counts,
-            **sim_args
+            **final_args
         )
     except Exception as e:
         print(f"Simulation failed: {e}")
