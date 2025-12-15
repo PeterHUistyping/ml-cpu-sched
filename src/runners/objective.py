@@ -1,10 +1,13 @@
 # runners/objective.py
 
 import optuna
+import logging
 from typing import Callable, Dict
 
 from sim.simulator import run_simulation
 
+
+logger = logging.getLogger(__file__)
 
 PROCESSOR_TYPES = ["little", "medium", "big"]
 
@@ -71,8 +74,8 @@ def objective(
             **final_args
         )
     except Exception as e:
-        print(f"Simulation failed: {e}")
-        return float('inf')
+        logger.warning(f"Simulation failed: {e}. Returning penalty.")
+        return 1e12
 
     # Metric Calculation
     energy = results["avg_energy"]

@@ -13,7 +13,7 @@ def evaluate_edp(energy: float, time: float, power: int = 1) -> float:
                      If you prioritize performance more, set to 2 (i.e., ED^2P).
     """
     if time <= 0 or energy <= 0:
-        return float('inf')  # Penalize invalid states
+        return 1e12  # Penalize invalid states
 
     return energy * (time ** power)
 
@@ -70,7 +70,7 @@ def evaluate_inverse_log_loss(
         gamma: Penalty weight for time
     """
     if energy <= 0 or time <= 0:
-        return float('inf')
+        return 1e12
 
     # Using log addition instead of multiplication smoothes magnitude differences; ideal for optimizers.
     return beta * math.log(energy) + gamma * math.log(time)
