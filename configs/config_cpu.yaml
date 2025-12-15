@@ -4,4 +4,7 @@ algo_name: CPUSched
 
 n_trials: 100
 
+loss_weight_beta: 1.0
+loss_weight_gamma: 2.0
+
 output_path: "outputs/"
