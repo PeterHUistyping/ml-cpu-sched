@@ -58,7 +58,7 @@ def objective(
     sim_args = {}
 
     if env_type in ["ROUND_ROBIN", "PRIORITY"]:
-        sim_args['quantum'] = trial.suggest_float("quantum_ms", 0.5, 5.0)
+        sim_args['quantum'] = trial.suggest_float("quantum_ms", 2.0, 20.0)
 
     # Run Simulation)
     try:

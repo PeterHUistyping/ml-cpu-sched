@@ -10,7 +10,7 @@ from runners.bo_runner import OptimizerRunner
 
 @hydra.main(version_base=None, config_path="../configs", config_name="config_cpu")
 def main(args: DictConfig):
-    n_trials = args.get("n_trials", 50)
+    n_trials = args.get("n_trials", 100)
     output_path = Path(args.get("output_path", "./outputs"))
     algo_name = args.get("algo_name", "RoundRobin")
     experiment_name = f"GP_BO_{algo_name}"
@@ -35,7 +35,7 @@ def main(args: DictConfig):
 
     # Simulator constant
     simulation_params = {
-        "n_tasks": args.get("n_tasks", 10),
+        "n_tasks": args.get("n_tasks", 500),
         "t_simulation_end": args.get("t_simulation_end", 100)
     }
     logger.info(f"Simulation Constants: {simulation_params}")
