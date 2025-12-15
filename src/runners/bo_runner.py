@@ -2,6 +2,7 @@
 
 import optuna
 import logging
+from functools import partial
 from typing import Callable, Dict, Any, Optional
 from optuna_integration.botorch import BoTorchSampler
 
@@ -15,6 +16,8 @@ class OptimizerRunner:
     def __init__(
         self,
         metric_func: Callable = evaluate_inverse_log_loss,
+        metric_params: Dict[str, float] = None,
+        simulation_params: Dict[str, Any] = None,
         n_trials: int = 50,
         study_name: str = "GP_BO_Scheduler_Tuning",
         storage_path: Optional[str] = None
@@ -23,12 +26,17 @@ class OptimizerRunner:
         Setup Runner for BO experiment. 
 
         Args:
-            metric_func (Callable): Metric func to calculate cost. 
+            metric_func (Callable): Metric func to calculate cost.
+            metric_params (Dict): Fixed parameters for the metric function (e.g. beta=1.0).
+            simulation_params (Dict): Fixed parameters for the simulator (e.g. n_tasks=10).
             n_trials (int): Times of BO.
-            study_name (str): Name of Optuna Study. 
-            storage_path (str): Database path to store the results. 
+            study_name (str): Name of Optuna Study.
+            storage_path (str): Database path to store the results.
         """
         self.metric_func = metric_func
+        self.metric_params = metric_params if metric_params is not None else {}
+        self.simulation_params = simulation_params if simulation_params is not None else {}
+
         self.n_trials = n_trials
         self.study_name = study_name
         self.storage_path = storage_path
@@ -45,14 +53,22 @@ class OptimizerRunner:
             direction="minimize",
             sampler=self.sampler,
             study_name=self.study_name,
-            storage=self.storage_path
+            storage=self.storage_path,
+            load_if_exists=True
         )
 
         # Run BO.
         logger.info(f"🚀 Begin '{self.n_trials}' times BO optimization... ")
 
+        target_func = partial(
+            objective,
+            metric_func=self.metric_func,
+            metric_params=self.metric_params,
+            **self.simulation_params
+        )
+
         study.optimize(
-            lambda trial: objective(trial, self.metric_func),
+            target_func,
             n_trials=self.n_trials,
             show_progress_bar=True
         )

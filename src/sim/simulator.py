@@ -25,13 +25,15 @@ class SchedulingStrategy:
 scheduling_strategy = SchedulingStrategy.ROUND_ROBIN
 # scheduling_strategy = SchedulingStrategy.PRIORITY
 n_tasks = 10
-n_processor_types = 3                             # little, medium, big 
-n_processors_per_type = [2] * n_processor_types   # number of processors for each type
-# or use [2, 2, 2] 
+n_processor_types = 3                             # little, medium, big
+# number of processors for each type
+n_processors_per_type = [2] * n_processor_types
+# or use [2, 2, 2]
 n_processors = sum(n_processors_per_type)
 t_simulation_end = 100
 # Processor frequency: here we assume the frequency is fixed along the task execution for simplicity.
-frequencies = [0.5, 1.0, 2.0]  # processor frequency (GHz) for little, medium, big
+# processor frequency (GHz) for little, medium, big
+frequencies = [0.5, 1.0, 2.0]
 quantum = 1.0       # time quantum for Round Robin (ms)
 
 # determine extra args for filename
@@ -83,9 +85,11 @@ def write_results_html(extra_args='', output_dir="outputs/", WRITE_ANALYSIS=True
         f.write(
             f"<h2>Scheduler {scheduling_strategy} Processors Timelines</h2>\n")
         for i in range(n_processors):
-            f.write(f'<h3>Processor {i} Timeline ({processors[i].frequency} GHz)</h3>\n')
+            f.write(
+                f'<h3>Processor {i} Timeline ({processors[i].frequency} GHz)</h3>\n')
             # write processor[i].end_time, processors[i].active_time, processors[i].get_idle_energy()
-            f.write(f"<p>Idle Energy Consumption: {processors[i].get_idle_energy()} J, [End Time: {processors[i].end_time} s, Active Time: {processors[i].active_time} s, Idle Time: {processors[i].idle_time} s].</p>\n")
+            f.write(
+                f"<p>Idle Energy Consumption: {processors[i].get_idle_energy()} J, [End Time: {processors[i].end_time} s, Active Time: {processors[i].active_time} s, Idle Time: {processors[i].idle_time} s].</p>\n")
             f.write(
                 f'<img src="processor_{i}_timeline_{extra_args}.png" alt="Processor {i} Timeline"><br>\n')
 
@@ -146,15 +150,16 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=True):
         for task in tasks_list:
 
             response_time = task.start_time - task.arrival_time
-            weighted_duration = weighted_time_by_priority(task.duration, task.priority)
-    
+            weighted_duration = weighted_time_by_priority(
+                task.duration, task.priority)
+
             if WRITE_SINGLE_TASK_ANALYSIS:
                 f.write(
                     f"[Task {task.task_id}] turn around time = {task.duration} (finish={task.finish_time} - arrival={task.arrival_time}) \n \t total task size = {task.size}, \n")
 
                 f.write(
                     f"\t response time = {response_time} (start={task.start_time} - arrival={task.arrival_time})\n")
-                
+
                 f.write(
                     f"\t weighted turn around time by priority (priority={task.priority}) = {weighted_duration}\n")
 
@@ -173,63 +178,84 @@ def write_analysis_file(output_dir="outputs/", WRITE_SINGLE_TASK_ANALYSIS=True):
         f.write(
             f"\n[turn around time] Average : {avg_duration}, Variance: {var_duration}\n")
 
-        avg_response_time, var_response_time = get_mean_and_variance(response_time_list)
+        avg_response_time, var_response_time = get_mean_and_variance(
+            response_time_list)
         f.write(
             f"[response time] Average : {avg_response_time}, Variance: {var_response_time}\n")
-        
-        avg_weighted_duration, var_weighted_duration = get_mean_and_variance(weight_duration_list)
+
+        avg_weighted_duration, var_weighted_duration = get_mean_and_variance(
+            weight_duration_list)
         f.write(
             f"[weighted turn around time by priority] Average : {avg_weighted_duration}, Variance: {var_weighted_duration}\n")
-        
-        energy_list = [a + b for a, b in zip(active_energy_list, idle_energy_list)]
+
+        energy_list = [a + b for a,
+                       b in zip(active_energy_list, idle_energy_list)]
         avg_energy, var_energy = get_mean_and_variance(energy_list)
         f.write(
             f"[energy consumption] Average : {avg_energy} J, Variance: {var_energy} J\n")
-        
+
         # also write active and idle energy separately
-        avg_active_energy, var_active_energy = get_mean_and_variance(active_energy_list)
+        avg_active_energy, var_active_energy = get_mean_and_variance(
+            active_energy_list)
         f.write(
             f"\t[active energy consumption] Average : {avg_active_energy} J, Variance: {var_active_energy} J\n")
-        
-        avg_idle_energy, var_idle_energy = get_mean_and_variance(idle_energy_list)
+
+        avg_idle_energy, var_idle_energy = get_mean_and_variance(
+            idle_energy_list)
         f.write(
             f"\t[idle energy consumption] Average : {avg_idle_energy} J, Variance: {var_idle_energy} J\n")
 
 
-def run_simulation(env_type: str, freq: float, **args) -> Dict[str, float]:
+def run_simulation(
+    env_type: str,
+    processor_freqs: List[float],
+    processor_counts: List[int],
+    **args
+) -> Dict[str, float]:
     """
     Main interface for running scheduling task simulation.
+    Now supports heterogeneous processor configurations and PRIORITY scheduling.
 
     Args:
-        env_type (str): Type of the simulation environment ("FCFS" or "ROUND_ROBIN"). 
-        freq (float): Frequency of CPU processor (GHz).
-        **args: Other simulation arguments, including 'quantum' for ROUND_ROBIN.
+        env_type (str): Type of the simulation environment ("FCFS", "ROUND_ROBIN", "PRIORITY"). 
+        processor_freqs (List[float]): List of frequencies for each processor type.
+        processor_counts (List[int]): List of counts for each processor type.
+                                      e.g. freqs=[0.5, 2.0], counts=[2, 4] means 
+                                      2 processors @ 0.5GHz and 4 processors @ 2.0GHz.
+        **args: Other simulation arguments, including 'quantum' for ROUND_ROBIN/PRIORITY.
     Return:
         Dict[str, float]: Performance results {"avg_energy", "avg_duration"}.
     """
 
-    VALID_ENV = {
-        "FCFS": SchedulingStrategy.FCFS,
-        "ROUND_ROBIN": SchedulingStrategy.ROUND_ROBIN
-    }
+    VALID_ENV = ["FCFS", "ROUND_ROBIN", "PRIORITY"]
 
-    assert env_type in VALID_ENV.keys(
-    ), f"Environment '{env_type}' is not supported! "
+    assert env_type in VALID_ENV, f"Environment '{env_type}' is not supported! "
+
+    # Validation for heterogeneous config
+    assert len(processor_freqs) == len(processor_counts), \
+        "Mismatch between processor frequencies and counts list lengths."
 
     # initialize params
     t_simulation_end = args.get('t_simulation_end', 100)
     n_tasks = args.get('n_tasks', 10)
-    n_processors = args.get('n_processors', 1)
+    # n_processors is now derived from processor_counts
 
     env = simpy.Environment()
     task_factory = TaskFactory(n_tasks=n_tasks)
     tasks_list = task_factory.create_tasks()
 
-    # initialize processor
-    processors = [
-        BaseProcessor(env, processor_id=i, logging=logging, frequency=freq)
-        for i in range(n_processors)
-    ]
+    # initialize processor (Heterogeneous Logic)
+    processors = []
+    processor_id = 0
+
+    # Iterate through the types defined by the input lists
+    for freq, count in zip(processor_freqs, processor_counts):
+        for _ in range(count):
+            processors.append(
+                BaseProcessor(env, processor_id=processor_id,
+                              logging=logging, frequency=freq)
+            )
+            processor_id += 1
 
     # initialize scheduler
     if env_type == "FCFS":
@@ -244,39 +270,58 @@ def run_simulation(env_type: str, freq: float, **args) -> Dict[str, float]:
         scheduler = RoundRobinScheduler(
             env, processors, logging=logging, quantum=quantum)
 
+    elif env_type == "PRIORITY":
+        quantum = args.get('quantum')
+        # Check if quantum is needed strictly or if we can use a default.
+        # Based on your previous main block, PRIORITY used quantum.
+        if quantum is None:
+            raise ValueError(
+                "Environment PRIORITY requires the 'quantum' argument in **args.")
+
+        # Preserving your original initialization logic
+        scheduler = PriorityScheduler(
+            env, processors, logging=logging, quantum=quantum, USE_QUANTUM=True)
+
     # run simulation
     for processor in processors:
         processor.scheduler = scheduler
+
+    # Assuming task_arrival_generator is defined in the scope or imported
     env.process(task_arrival_generator(env, tasks_list, scheduler))
     env.run(until=t_simulation_end)
 
-    duration_list = []
-    weighted_duration_list = []
-    energy_list = []
-    active_energy_list = []
-    idle_energy_list = []
+    # --- Data Collection for Metrics ---
 
+    duration_list = []
+    # weighted_duration_list = [] # Optional: Calculate if needed for specific metrics
+
+    # 1. Collect Task Metrics (Active Energy & Duration)
+    total_active_energy = 0.0
     for task in tasks_list:
         duration_list.append(task.duration)
+        total_active_energy += task.energy
 
-        # weighted turn around time by priority
-        weighted_duration = weighted_time_by_priority(task.duration, task.priority)
-        weighted_duration_list.append(weighted_duration)
-
-        # energy consumption when core is active
-        active_energy_list.append(task.energy)
-    
+    # 2. Collect Processor Metrics (Idle Energy)
+    total_idle_energy = 0.0
     for processor in processors:
         # energy consumption when core is idle
         idle_energy = processor.get_idle_energy()
-        idle_energy_list.append(idle_energy)
+        total_idle_energy += idle_energy
 
-    # total energy consumption
-    energy_list = [a + b for a, b in zip(active_energy_list, idle_energy_list)]
+    # 3. Aggregation
+    # Note: Corrected the logic from zip(active, idle) which was dimensionally mismatched
+    # (n_tasks vs n_processors). Now summing totals first.
+    total_system_energy = total_active_energy + total_idle_energy
+
+    avg_energy = total_system_energy / n_tasks if n_tasks > 0 else 0.0
+    avg_duration = np.mean(duration_list) if duration_list else 0.0
+
     # Return the metric for Optuna Objective func
+    # These keys map directly to the inputs 'energy' and 'time' in your new metric functions.
     return {
-        "avg_energy": np.mean(energy_list),
-        "avg_duration": np.mean(duration_list)
+        "avg_energy": avg_energy,
+        "avg_duration": avg_duration,
+        "total_energy": total_system_energy
     }
 
 
@@ -290,7 +335,6 @@ if __name__ == "__main__":
     task_factory.visualize_tasks()
     logger.info(f"Created {len(tasks_list)} tasks.",
                 extra={"tasks": tasks_list})
-
 
     processors = []
     processor_id = 0
