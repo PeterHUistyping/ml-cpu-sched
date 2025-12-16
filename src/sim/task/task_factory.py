@@ -32,13 +32,20 @@ class TaskFactory:
         '''
             Create n_tasks tasks with random arrival times and sizes.
         '''
+        current_arrival_time = 0.0
+
         for i in range(1, self.n_tasks + 1):
             # create a random number
             # e.g., arrival time between 0 and 100
-            arrival_time = random.uniform(0, 10)
+            inter_arrival_time = random.expovariate(self.RATE_LAMBDA)
+            current_arrival_time += inter_arrival_time
+            arrival_time = current_arrival_time
+
             size = random.uniform(1, 8)  # e.g., size between 1 and 10
-            priority = random.randint(0, 4)  # priority levels 0 (highest), 1, 2
-            task = BaseTask(task_id=i, arrival_time=arrival_time, size=size, priority=priority)
+            # priority levels 0 (highest), 1, 2
+            priority = random.randint(0, 4)
+            task = BaseTask(task_id=i, arrival_time=arrival_time,
+                            size=size, priority=priority)
             # task.print_info()
             self.tasks.append(task)
 
