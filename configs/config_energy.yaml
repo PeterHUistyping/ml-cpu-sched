@@ -1,0 +1,10 @@
+# configs/config_energy.yaml
+
+algo_name: CPUSched_energy
+
+n_trials: 500
+
+loss_weight_beta: 1.0
+loss_weight_gamma: 2.0
+
+output_path: "outputs/"

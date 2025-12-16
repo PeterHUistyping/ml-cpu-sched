@@ -1,6 +1,6 @@
-# configs/config_rr.yaml
+# configs/config_balance.yaml
 
-algo_name: CPUSched
+algo_name: CPUSched_balance
 
 n_trials: 500
 

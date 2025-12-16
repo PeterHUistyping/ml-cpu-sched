@@ -13,7 +13,7 @@ fi
 cd $PROJ_ROOT
 conda activate ml-sched
 
-python src/main.py --config-name=config_cpu \
+python src/main.py --config-name=config_balance \
     n_trials=100
 
 cd $SCRIPT_DIR

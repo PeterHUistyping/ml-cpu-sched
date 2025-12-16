@@ -1,0 +1,10 @@
+# configs/config_time.yaml
+
+algo_name: CPUSched_time
+
+n_trials: 500
+
+loss_weight_beta: 2.0
+loss_weight_gamma: 1.0
+
+output_path: "outputs/"
