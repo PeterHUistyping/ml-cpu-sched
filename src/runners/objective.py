@@ -55,7 +55,7 @@ def objective(
     if sum(processor_counts) == 0:
         logger.warning(
             f"Trial {trial.number} suggested 0 processors. Applying penalty.")
-        return 0.0
+        return 1e3
 
     # Scheduling Strategy Search)
     env_type = trial.suggest_categorical(

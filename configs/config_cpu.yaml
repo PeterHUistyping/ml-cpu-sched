@@ -2,9 +2,9 @@
 
 algo_name: CPUSched
 
-n_trials: 100
+n_trials: 500
 
 loss_weight_beta: 1.0
-loss_weight_gamma: 2.0
+loss_weight_gamma: 1.0
 
 output_path: "outputs/"

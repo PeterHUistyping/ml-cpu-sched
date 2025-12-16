@@ -36,7 +36,9 @@ def main(args: DictConfig):
     # Simulator constant
     simulation_params = {
         "n_tasks": args.get("n_tasks", 500),
-        "t_simulation_end": args.get("t_simulation_end", 100)
+        "t_simulation_end": args.get("t_simulation_end", 1000),
+        "rate_lambda": args.get("rate_lambda", 1.0)
+
     }
     logger.info(f"Simulation Constants: {simulation_params}")
 

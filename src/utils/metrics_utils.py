@@ -1,6 +1,9 @@
 import math
 
 
+MAX_LOSS_PENALTY = 1e3
+
+
 def evaluate_edp(energy: float, time: float, power: int = 1) -> float:
     """
     1. Energy-Delay Product (EDP)
@@ -13,7 +16,7 @@ def evaluate_edp(energy: float, time: float, power: int = 1) -> float:
                      If you prioritize performance more, set to 2 (i.e., ED^2P).
     """
     if time <= 0 or energy <= 0:
-        return 0.0  # Penalize invalid states
+        return MAX_LOSS_PENALTY  # Penalize invalid states
 
     return energy * (time ** power)
 
@@ -70,7 +73,7 @@ def evaluate_inverse_log_loss(
         gamma: Penalty weight for time
     """
     if energy <= 0 or time <= 0:
-        return 0.0
+        return MAX_LOSS_PENALTY
 
     # Using log addition instead of multiplication smoothes magnitude differences; ideal for optimizers.
     return beta * math.log(energy) + gamma * math.log(time)

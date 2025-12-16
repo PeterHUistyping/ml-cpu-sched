@@ -236,12 +236,13 @@ def run_simulation(
         "Mismatch between processor frequencies and counts list lengths."
 
     # initialize params
-    t_simulation_end = args.get('t_simulation_end', 100)
+    t_simulation_end = args.get('t_simulation_end', 1000)
     n_tasks = args.get('n_tasks', 10)
+    rate_lambda = args.get('rate_lambda', 1.0)
     # n_processors is now derived from processor_counts
 
     env = simpy.Environment()
-    task_factory = TaskFactory(n_tasks=n_tasks)
+    task_factory = TaskFactory(n_tasks=n_tasks, rate_lambda=rate_lambda)
     tasks_list = task_factory.create_tasks()
 
     # initialize processor (Heterogeneous Logic)

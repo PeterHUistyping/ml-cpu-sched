@@ -14,10 +14,11 @@ class TaskFactory:
             Random assignment of arrival times and sizes.
     '''
 
-    def __init__(self, n_tasks: int):
+    def __init__(self, n_tasks: int, rate_lambda: float):
 
         self.n_tasks = n_tasks
         self.tasks = []
+        self.rate_lambda = rate_lambda
 
         # fixed seed for reproducibility
         random.seed(42)
@@ -37,7 +38,7 @@ class TaskFactory:
         for i in range(1, self.n_tasks + 1):
             # create a random number
             # e.g., arrival time between 0 and 100
-            inter_arrival_time = random.expovariate(self.RATE_LAMBDA)
+            inter_arrival_time = random.expovariate(self.rate_lambda)
             current_arrival_time += inter_arrival_time
             arrival_time = current_arrival_time
 
