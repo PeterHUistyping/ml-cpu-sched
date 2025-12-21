@@ -1,0 +1,9 @@
+experiment_name: optimize_kernel_rbf
+kernel_type: rbf
+objective_type: default
+
+
+loss_weight_beta: 1.0
+loss_weight_gamma: 1.0
+
+rate_lambda: 1.0

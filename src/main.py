@@ -12,7 +12,7 @@ from runners.bo_runner import OptimizerRunner
 def main(args: DictConfig):
     n_trials = args.get("n_trials", 100)
     output_path = Path(args.get("output_path", "./outputs"))
-    algo_name = args.get("algo_name", "RoundRobin")
+    algo_name = args.experiment.get("experiment_name", "")
     experiment_name = f"GP_BO_{algo_name}"
 
     db_filename = f"{experiment_name}_results.db"
@@ -28,8 +28,8 @@ def main(args: DictConfig):
 
     # Metric hyperparams
     metric_params = {
-        "beta": args.get("loss_weight_beta", 1.0),
-        "gamma": args.get("loss_weight_gamma", 1.0)
+        "beta": args.experiment.get("loss_weight_beta", 1.0),
+        "gamma": args.experiment.get("loss_weight_gamma", 1.0)
     }
     logger.info(f"Metric Parameters: {metric_params}")
 
@@ -37,11 +37,13 @@ def main(args: DictConfig):
     simulation_params = {
         "n_tasks": args.get("n_tasks", 500),
         "t_simulation_end": args.get("t_simulation_end", 1000),
-        "rate_lambda": args.get("rate_lambda", 1.0)
+        "rate_lambda": args.experiment.get("rate_lambda", 1.0)
     }
     logger.info(f"Simulation Constants: {simulation_params}")
 
-    kernel_type = args.get("kernel_type", "matern_2.5")
+    kernel_type = args.experiment.get("kernel_type", "matern_2.5")
+    n_startup_trials = args.get("n_startup_trials", 5)
+    objective_type = args.experiment.get("objective_type", "default")
 
     try:
         runner = OptimizerRunner(
@@ -52,6 +54,8 @@ def main(args: DictConfig):
             study_name=experiment_name,
             storage_path=storage_url,
             kernel_type=kernel_type,
+            n_startup_trials=n_startup_trials,
+            objective_type=objective_type,
         )
 
         best_trial = runner.run()

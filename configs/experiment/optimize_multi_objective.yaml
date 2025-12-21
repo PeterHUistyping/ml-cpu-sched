@@ -1,0 +1,8 @@
+experiment_name: optimize_multi_objective
+kernel_type: matern_2.5
+objective_type: multi
+
+loss_weight_beta: 1.0 # won't be effected
+loss_weight_gamma: 1.0 # won't be effected
+
+rate_lambda: 1.0

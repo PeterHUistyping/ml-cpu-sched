@@ -1,0 +1,9 @@
+experiment_name: optimize_lambda_high
+kernel_type: matern_2.5
+objective_type: default
+
+
+loss_weight_beta: 1.0
+loss_weight_gamma: 1.0
+
+rate_lambda: 5.0

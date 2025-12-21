@@ -44,6 +44,7 @@ def custom_candidate_func(
     train_obj: torch.Tensor,
     train_con: Optional[torch.Tensor],
     bounds: torch.Tensor,
+    pending_x: Optional[torch.Tensor] = None,
     kernel_type: str = "matern_2.5"
 ) -> torch.Tensor:
     """
@@ -58,7 +59,7 @@ def custom_candidate_func(
     covar_module = get_covar_module(kernel_type, ard_num_dims=input_dim)
 
     model = SingleTaskGP(
-        train_x=train_x,
+        train_X=train_x,
         train_Y=train_obj,
         covar_module=covar_module
     )

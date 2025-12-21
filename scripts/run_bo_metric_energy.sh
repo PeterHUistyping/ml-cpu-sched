@@ -13,7 +13,8 @@ fi
 cd $PROJ_ROOT
 conda activate ml-sched
 
-python src/main.py --config-name=config_energy \
+python src/main.py --config-name=config \
+    experiment=optimize_metric_energy \
     n_trials=100
 
 cd $SCRIPT_DIR
