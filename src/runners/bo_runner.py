@@ -8,6 +8,7 @@ from optuna_integration.botorch import BoTorchSampler
 
 from .objective import objective
 from utils.metrics_utils import evaluate_inverse_log_loss
+from utils.botorch_utils import custom_candidate_func
 
 logger = logging.getLogger(__file__)
 
@@ -20,7 +21,8 @@ class OptimizerRunner:
         simulation_params: Dict[str, Any] = None,
         n_trials: int = 50,
         study_name: str = "GP_BO_Scheduler_Tuning",
-        storage_path: Optional[str] = None
+        storage_path: Optional[str] = None,
+        kernel_type: str = "matern_2.5",
     ):
         """
         Setup Runner for BO experiment. 
@@ -40,9 +42,27 @@ class OptimizerRunner:
         self.n_trials = n_trials
         self.study_name = study_name
         self.storage_path = storage_path
+        self.kernel_type = kernel_type
 
-        self.sampler = BoTorchSampler()
+        self._setup_sampler()
         logger.info("Initialize BoTorchSampler...")
+
+    def _setup_sampler(self):
+        """
+        Configures the BoTorchSampler with the specific kernel logic.
+        """
+        logger.info(
+            f"Initialize BoTorchSampler with kernel: {self.kernel_type}...")
+
+        candidate_func_with_kernel = partial(
+            custom_candidate_func,
+            kernel_type=self.kernel_type
+        )
+
+        self.sampler = BoTorchSampler(
+            candidate_func=candidate_func_with_kernel,
+            n_startup_trials=5
+        )
 
     def run(self) -> optuna.Trial:
         """

@@ -1,8 +1,9 @@
 # configs/config_balance.yaml
 
-algo_name: CPUSched_balance
+algo_name: CPUSched_${kernel_type}_balance
+kernel_type: matern_2.5
 
-n_trials: 500
+n_trials: 1000
 
 loss_weight_beta: 1.0
 loss_weight_gamma: 1.0

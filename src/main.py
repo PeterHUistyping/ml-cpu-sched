@@ -38,9 +38,10 @@ def main(args: DictConfig):
         "n_tasks": args.get("n_tasks", 500),
         "t_simulation_end": args.get("t_simulation_end", 1000),
         "rate_lambda": args.get("rate_lambda", 1.0)
-
     }
     logger.info(f"Simulation Constants: {simulation_params}")
+
+    kernel_type = args.get("kernel_type", "matern_2.5")
 
     try:
         runner = OptimizerRunner(
@@ -49,7 +50,8 @@ def main(args: DictConfig):
             simulation_params=simulation_params,
             n_trials=n_trials,
             study_name=experiment_name,
-            storage_path=storage_url
+            storage_path=storage_url,
+            kernel_type=kernel_type,
         )
 
         best_trial = runner.run()
