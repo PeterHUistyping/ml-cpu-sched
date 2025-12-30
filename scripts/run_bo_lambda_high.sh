@@ -14,7 +14,7 @@ cd $PROJ_ROOT
 conda activate ml-sched
 
 python src/main.py --config-name=config \
-    experiment=optimize_lambda_low \
+    experiment=optimize_lambda_high \
     n_trials=100
 
 cd $SCRIPT_DIR
