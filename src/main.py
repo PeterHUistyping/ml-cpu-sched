@@ -58,13 +58,31 @@ def main(args: DictConfig):
             objective_type=objective_type,
         )
 
-        best_trial = runner.run()
+        best_results = runner.run()
 
-        logger.info(
-            f"\nOptimization complete. Best Trial ID: {best_trial.number}")
-        logger.info(
-            f"Optimal objective value achieved: {best_trial.value:.4f}")
-        logger.info(f"Best Hyperparameters: {best_trial.params}")
+        if objective_type == "multi":
+            logger.info("\n" + "="*50)
+            logger.info(f"🎉 Multi-Objective Optimization Complete.")
+            logger.info(
+                f"Found {len(best_results)} solutions on the Pareto Front.")
+
+            for i, trial in enumerate(best_results):
+                logger.info(
+                    f"\n--- Pareto Solution {i+1} (ID: {trial.number}) ---")
+                # values 是一个列表 [Energy, Time]
+                logger.info(f"Objectives [Energy, Time]: {trial.values}")
+                logger.info(f"Params: {trial.params}")
+
+            logger.info("="*50)
+
+        else:
+            best_trial = best_results
+
+            logger.info(
+                f"\nOptimization complete. Best Trial ID: {best_trial.number}")
+            logger.info(
+                f"Optimal objective value achieved: {best_trial.value:.4f}")
+            logger.info(f"Best Hyperparameters: {best_trial.params}")
 
     except Exception as e:
         logger.error(
