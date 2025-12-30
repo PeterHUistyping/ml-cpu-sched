@@ -60,21 +60,22 @@ class OptimizerRunner:
         if self.objective_type == "multi":
             # Using default kernel for multi-objective BO for now...
             logger.info(
-                "Using default BoTorchSampler strategy for Multi-Objective.")
+                "Using default BoTorchSampler strategy for Multi-Objective."
+            )
             self.sampler = BoTorchSampler(n_startup_trials=n_startup_trials)
+        else:
+            logger.info(
+                f"Initialize BoTorchSampler with kernel: {self.kernel_type}...")
 
-        logger.info(
-            f"Initialize BoTorchSampler with kernel: {self.kernel_type}...")
+            candidate_func_with_kernel = partial(
+                custom_candidate_func,
+                kernel_type=self.kernel_type
+            )
 
-        candidate_func_with_kernel = partial(
-            custom_candidate_func,
-            kernel_type=self.kernel_type
-        )
-
-        self.sampler = BoTorchSampler(
-            candidates_func=candidate_func_with_kernel,
-            n_startup_trials=n_startup_trials
-        )
+            self.sampler = BoTorchSampler(
+                candidates_func=candidate_func_with_kernel,
+                n_startup_trials=n_startup_trials
+            )
 
     def run(self) -> optuna.Trial:
         """
@@ -102,7 +103,7 @@ class OptimizerRunner:
 
         elif self.objective_type == "multi":
             study = optuna.create_study(
-                direction=["minimize", "minimize"],
+                directions=["minimize", "minimize"],
                 sampler=self.sampler,
                 study_name=self.study_name,
                 storage=self.storage_path,
