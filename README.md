@@ -56,7 +56,7 @@ gamma: float = range(0.5, 5.0)
 
 After the optimization is finished, use `optuna-dashboard` to check the results with corresponding analysis:
 ```shell
-optuna-dashboard sqlite:///outputs/GP_BO_CPUSched_results.db
+optuna-dashboard sqlite:///results_db/GP_BO_optimize_metric_balance_results.db
 ```
 
 ## Code structure
