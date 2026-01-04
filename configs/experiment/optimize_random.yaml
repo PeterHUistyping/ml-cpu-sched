@@ -1,5 +1,5 @@
-experiment_name: optimize_metric_balance
-kernel_type: matern_1.5
+experiment_name: optimize_random
+kernel_type: random
 objective_type: default
 
 

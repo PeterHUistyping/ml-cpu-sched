@@ -5,6 +5,7 @@ import logging
 from functools import partial
 from typing import Callable, Dict, Any, Optional
 from optuna_integration.botorch import BoTorchSampler
+from optuna.samplers import RandomSampler
 
 from .objective import objective, objective_multi
 from utils.metrics_utils import evaluate_inverse_log_loss
@@ -57,6 +58,11 @@ class OptimizerRunner:
         """
         Configures the BoTorchSampler with the specific kernel logic.
         """
+        if self.kernel_type == "random":
+            logger.info("🎲 Using Random Sampler as Baseline...")
+            self.sampler = RandomSampler(seed=42)
+            return
+
         if self.objective_type == "multi":
             # Using default kernel for multi-objective BO for now...
             logger.info(

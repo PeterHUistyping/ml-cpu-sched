@@ -1,5 +1,5 @@
 experiment_name: optimize_metric_energy
-kernel_type: matern_2.5
+kernel_type: matern_1.5
 objective_type: default
 
 
