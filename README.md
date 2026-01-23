@@ -1,4 +1,4 @@
-# Machine Learning for Energy-Performance-Aware Scheduling
+# Machine Learning for Energy-Performance-aware Scheduling
 
 
 A machine learning-based study for scheduling heterogeneous multi-core systems.
