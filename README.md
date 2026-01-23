@@ -1,6 +1,8 @@
 # Machine Learning for Energy-Performance-Aware Scheduling
 
-A machine learning-based study for scheduling: Energy-performance-aware scheduling in heterogeneous multi-core systems, [Cambridge ACS L48 MLPW project].
+A machine learning-based study for scheduling: Energy-performance-aware scheduling in heterogeneous multi-core systems
+- [Cambridge ACS L48 MLPW](https://www.cl.cam.ac.uk/teaching/2526/L48/) project.
+- [course page ](https://mlatcl.github.io/mlphysical/), [2526](https://carlhenrik.com/l48-mlpw/)
 
 | Gaussian process | sensitivity analysis | Bayesian optimization |
 
