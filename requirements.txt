@@ -1,8 +1,0 @@
-matplotlib
-numpy
-simpy
-hydra-core
-optuna
-optuna-integration
-optuna-dashboard
-botorch
