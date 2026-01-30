@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head lang="en">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV0RC59Q5E"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FV0RC59Q5E');
+    </script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>ml-cpu-sched: Machine Learning for Energy-Performance-aware Scheduling</title>
+    <!-- NeuMaDiff -->
+
+     <!-- mirror: F0%9F%AA%9E&lt -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+
+<body>
+<div class="container" id="header" style="text-align: center; margin: auto;">
+    <div class="row" id="title-row" style="max-width: 100%; margin: 0 auto; display: inline-block">
+        <h2 class="col-md-12 text-center">
+            <b>Machine Learning for Energy-Performance-aware Scheduling</b><br>
+            <small>
+                ACS MLPW 2025-26<br/>
+            </small>
+        </h2>
+    </div>
+    <div class="row" id="author-row" style="margin:0 auto;">
+        <!-- <div class="col-md-12 text-center" style="display: table; margin:0 auto"> -->
+        <div class="text-center" style="display: table; margin:0 auto">
+          <a href="https://peterhuistyping.github.io/" style="font-size: 18px;">Zheyuan Hu</a>†,   <a href="https://mkiyoaki.github.io/" style="font-size: 18px;">Yifei Shi</a>†.
+            <br>
+            <a href="https://www.cst.cam.ac.uk/ " style="font-size: 14px;">Department of Computer Science and Technology</a>
+            <br>
+            <a href="https://www.cam.ac.uk/" style="font-size: 16px;">University of Cambridge</a>
+            <br>
+            <small>† denotes equal contribution.</small>
+            <br><br>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('author-row').style.maxWidth = document.getElementById("title-row").clientWidth + 'px';
+</script>
+
+<div class="container" id="main">
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4 text-center">
+            <ul class="nav nav-pills nav-justified" style="text-align: center;">
+                <li>
+                    <a href="https://arxiv.org/">
+                        <img src="./img/icon/paper_icon.png" alt="paper icon" height="70px">
+                        <h4><strong>Paper</strong></h4>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://github.com/PeterHUistyping/ml-cpu-sched">
+                        <img alt="github icon" src="./img/icon/github_icon.svg" height="70px">
+                        <h4><strong>Code</strong></h4>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://youtu.be">
+                    <!-- bilibili: https://www.bilibili.com/ -->
+                    <img src="./img/icon/video_icon.png" height="70px">
+                        <h4><strong>Video</strong></h4>
+                    </a>
+                </li>
+                <!-- <li>
+                    <a href="https://huggingface.co">
+                    <img src="./img/icon/data_icon.webp" height="70px">
+                        <h4><strong>dataset</strong></h4>
+                    </a>
+                </li> -->
+                <!-- <li>
+                    <a href="">
+                    <img src="./img/youtube_icon.png" height="90px">
+                        <h4><strong>Video</strong></h4>
+                    </a>
+                </li> -->
+            </ul>
+        </div>
+
+    </div>
+
+     <div style="text-align: center;">
+    <!-- Video player -->
+        <iframe 
+            id="videoFrame" 
+            width="560" 
+            height="315" 
+            src="https://www.youtube.com/" 
+            title="Video player" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            referrerpolicy="strict-origin-when-cross-origin" 
+            allowfullscreen>
+        </iframe>
+        <br>
+        <!-- Switch Button -->
+        <button id="switchBtn" onclick="switchVideo()" style="margin-top: 10px; padding: 2px 2px; font-size: 12px;">
+            Switch to Bilibili
+        </button>
+    </div>
+
+     <script>
+        let currentVideo = 0;
+        const videos = [
+            "https://www.youtube.com/",
+            "https://player.bilibili.com/"
+        ];
+
+        function switchVideo() {
+            currentVideo = 1 - currentVideo; // toggles between 0 and 1
+            document.getElementById("videoFrame").src = videos[currentVideo];
+            
+            // Change button text based on current video
+            document.getElementById("switchBtn").textContent = 
+                currentVideo === 0 ? "Switch to Bilibili" : "Switch to YouTube";
+        }
+    </script>
+
+    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 20px;">
+        <figure style="text-align: center; width: 43%;">
+            <img src="img/teaser.png" class="img-responsive" alt="teaser 1"
+                style="max-height: 450px; width: 100%; margin: auto;"/>
+            <figcaption>TODO</figcaption>
+        </figure>
+
+        <figure style="text-align: center; width: 53%;">
+            <img src="img/teaser-2.png" class="img-responsive" alt="teaser 2"
+                style="max-height: 450px; width: 100%; margin: auto;"/>
+            <figcaption>TODO</figcaption>
+        </figure>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <h3>
+                Abstract
+            </h3>
+            <p class="text-justify">
+              In the post-Dennard era, optimizing embedded systems requires navigating complex trade-offs between energy efficiency and latency. Traditional heuristic tuning is often inefficient in such high-dimensional, non-smooth landscapes. In this work, we propose a Bayesian Optimization framework using Gaussian Processes to automate the search for optimal scheduling configurations on heterogeneous multi-core architectures. We explicitly address the multi-objective nature of the problem by approximating the Pareto Frontier between energy and time. Furthermore, by incorporating Sensitivity Analysis (fANOVA) and comparing different covariance kernels (e.g., Matérn vs. RBF), we provide physical interpretability to the black-box model, revealing the dominant hardware parameters driving system performance.
+            </p>
+
+            <h3>
+                XX
+            </h3>
+            Our ..
+
+            <h3>
+                YY
+            </h3>
+            <figure>
+                <div style="text-align: center;">
+                    <img src="img/architecture.png" class="img-responsive" alt="synthesis framework" width="75%" />
+                    <!--  style="max-height: 450px;margin:auto;" -->
+                </div>
+                <figcaption>
+                    Figure:  TODO: architecture figure caption.
+                </figcaption>
+            </figure>
+
+    <br/>
+    <br/>
+  
+       
+    <h3>
+        Citation  
+    </h3>
+            If you found the paper or code useful, please consider citing: <br/>
+<pre><code>@inproceedings{
+    ml-cpu-sched-2026, 
+    author = {Zheyuan Hu and Yifei Shi}, 
+    title = {Machine Learning for Energy-Performance-aware Scheduling}, 
+    year = {2026}, 
+}</code></pre>
+            
+        <br><br>
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <p class="text-justify">
+                    The website template was inspired by <a href="https://peterhuistyping.github.io/M3ashy"><b>M<sup>3</sup>ashy</b></a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
