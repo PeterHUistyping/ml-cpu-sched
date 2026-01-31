@@ -127,7 +127,7 @@
         }
     </script>
 
-    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 20px;">
+    <!-- <div style="display: flex; justify-content: center; align-items: flex-start; gap: 20px;">
         <figure style="text-align: center; width: 43%;">
             <img src="img/teaser.png" class="img-responsive" alt="teaser 1"
                 style="max-height: 450px; width: 100%; margin: auto;"/>
@@ -139,7 +139,7 @@
                 style="max-height: 450px; width: 100%; margin: auto;"/>
             <figcaption>TODO</figcaption>
         </figure>
-    </div>
+    </div> -->
 
 
     <div class="row">
@@ -152,22 +152,157 @@
             </p>
 
             <h3>
-                XX
+                Introduction
             </h3>
-            Our ..
+    
+    <p>This work addresses the challenge of optimizing scheduling on heterogeneous multi-core processors to balance energy consumption and latency via the Gaussian Process-based Bayesian Optimization (GP-BO) framework, with analysis from Sensitivity Analysis. The contributions of our work are summarized as follows:</p>
 
-            <h3>
-                YY
-            </h3>
-            <figure>
-                <div style="text-align: center;">
-                    <img src="img/architecture.png" class="img-responsive" alt="synthesis framework" width="75%" />
-                    <!--  style="max-height: 450px;margin:auto;" -->
-                </div>
-                <figcaption>
-                    Figure:  TODO: architecture figure caption.
-                </figcaption>
-            </figure>
+    <ul>
+    <li><p><strong>Methodological Validation for Non-Smooth Landscapes:</strong>
+    We demonstrate that the scheduling landscape is inherently non-smooth. 
+    Through rigorous kernel benchmarking, we establish that the Matérn 5/2 
+    kernel outperforms the standard RBF kernel, as it correctly models the 
+    sharp performance cliffs associated with discrete core allocations.</p></li>
+    <li><p><strong>Discovery of "Race-to-Idle" Physics</strong>: By 
+    analyzing the energy-latency trade-off, our model autonomously 
+    rediscovers the "Race-to-Idle" phenomenon. We provide empirical evidence
+    that activating high-frequency big cores often yields superior energy 
+    efficiency compared to leakage-prone low-frequency execution.</p></li>
+    <li><p><strong>Structural Decoupling of Heterogeneity:</strong> Our 
+    multi-objective analysis reveals a functional decoupling in hardware 
+    resources. The optimizer learns to map latency-critical tasks to big 
+    cores while leveraging little cores for energy conservation, effectively
+    disentangling the conflicting objectives of the heterogeneous system.</p></li>
+    </ul> 
+
+    <h3>
+        Simulation Framework
+    </h3>
+
+    <p>We adopt <code>SimPy</code>, a process-based discrete-event framework, as our backend simulation environment. It supports waiting, interrupting a process and shared resources. Our simulator is divided into <code>Task</code>, <code>Processors</code>, <code>Schedulers</code>, and <code>Simulators</code> packages, where details are described as above. For efficient verification and debugging, we deploy <code>logging</code> to track every event of the simulation. For details, please refer to our paper.</p>
+
+    <figure>
+        <div style="text-align: center;">
+            <img src="img/simulator.png" class="img-responsive" alt="simulator" width="100%" />
+        </div>
+    </figure>
+
+    <h3>
+        Power and Performance Model
+    </h3>
+    With derivation from the paper, the <b>aggregated latency</b> is modelled as the priority-weighted turn around time of all tasks, and the <b>energy consumption</b> is modelled as the total energy of all cores during the scheduling period. Among which, active or dynamic power and idle or leakage power are considered, while the system (IO, memory, peripherals) power is ignored for simplicity. We visualize the power and performance model below.
+
+    <figure>
+        <div style="text-align: center;">
+            <img src="img/metric.png" class="img-responsive" alt="metrics" width="100%" />
+        </div>
+    </figure>
+
+    <h3> 
+        Emulation and Results
+    </h3>
+
+<div id="result"><p>To comprehensively evaluate the proposed BO framework, we designed four distinct experimental scenarios. Each scenario targets a specific aspect of the system's behaviour and the optimizer's capability.</p>
+
+<h4 id="surrogatemodelcalibration">(I) Surrogate Model Calibration</h4>
+<p>In this phase, we benchmark different kernels (RBF vs. Matérn) under a
+standard workload (λ=1.0). The objective is to determine which
+kernel best captures the discrete and non-smooth landscape of the CPU
+scheduling problem. The selected kernel is then used as the baseline for
+subsequent experiments.</p>
+
+<h4 id="preferencesensitivityanalysis">(II) Preference Sensitivity Analysis</h4>
+<p>Since the cost function 𝓛 is a weighted sum of energy and
+time, system behaviour is highly sensitive to the weights β
+(energy) and γ (time). We vary these coefficients to simulate
+different user priorities: <br/>&nbsp;&nbsp;&nbsp;
+
+(1) <em>Performance-First:</em> High penalty on time (γ > β),  <br/>&nbsp;&nbsp;&nbsp;
+(2) <em>Energy-First:</em> High penalty on energy (β > γ), <br/>&nbsp;&nbsp;&nbsp;
+(3) Equal weights (β = γ). <br/>
+
+The objective is to verify if the optimizer can correctly shift the hardware
+configuration (e.g., scaling frequencies or core counts) to align with
+the specified high-level preferences.</p>
+
+<h4 id="workloadrobustnesstesting">(III) Workload Robustness Testing</h4>
+<p>We evaluate the optimizer's robustness by varying the task arrival rate
+λ (from low load λ=0.5 to high load λ=5.0). The
+objective is to investigate how the optimal architectural configuration
+evolves under pressure. Specifically, we aim to observe if the system
+automatically scales up resources (e.g., activating big cores) to
+prevent latency cliffs during peak loads.</p>
+
+<h4 id="multiobjectiveparetoexploration">(IV) Multi-Objective Pareto Exploration</h4>
+<p>Finally, to overcome the limitations of fixed weights, we decouple the
+objectives and perform Multi-Objective Optimization (MOO). Instead of
+minimizing a scalar loss, we aim to approximate the Pareto Frontier. The
+objective is to uncover the intrinsic trade-off curve between Energy and
+Time, providing a set of non-dominated solutions that allow system
+administrators to make a posteriori decisions without manually tuning
+weights.</p></div>
+
+
+We utilize a combination of scalarized cost metrics, multi-objective indicators, and statistical distribution analysis. The below <b>table</b> presents a summary of the optimal configurations found across all experimental scenarios.
+
+    <figure>
+        <div style="text-align: center;">
+            <img src="img/result.png" class="img-responsive" alt="results" width="100%" />
+        </div>
+    </figure>
+
+    <h3>
+        Further Analysis
+    </h3>
+     We utilize sensitivity analysis to interpret the results and investigate the pareto frontier of the following four additional aspects. <br/><br/>
+     
+    (1) We evaluate the impact of the Gaussian Process covariance kernel on the optimization
+performance. We compared the Matérn 5/2, Matérn 3/2, and RBF kernels under the standard balanced
+metric defined by Equation 4, with the hyperparameter of β = 1, γ = 1.
+    <figure>
+        <div style="text-align: center;">
+            <img src="img/res_kernel.png" class="img-responsive" alt="res_kernel" width="100%" />
+        </div>
+    </figure>
+
+    (2) We measure results from different preference for energy-performance tradeoff. To assess the adaptability of the framework, we tested the optimizer under three distinct preference scenarios: Balance (β = γ = 1), Energy-First (β = 3, γ = 1), and Time-First (β = 1, γ = 3).
+    <figure>
+        <div style="text-align: center;">
+            <img src="img/res_metrics.png" class="img-responsive" alt="res_metrics" width="100%" />
+        </div>
+    </figure>
+
+    (3) We investigate workload robustness under varying task arrival rates. The results confirm that the optimizer performs autonomous scaling strategies aligned with the workload pressure.
+
+    <figure>
+        <div style="text-align: center;">
+            <img src="img/res_lambda.png" class="img-responsive" alt="res_lambda" width="100%" />
+        </div>
+    </figure>
+
+    (4) We explore Pareto frontier in the multi-objective optimization setting. Energy and Time are treated as conflicting objectives to approximate the Pareto Frontier. To provide a clear visualization of the trade-off surface, outliers with extreme penalties were filtered from the scatter plot.
+
+    <figure>
+        <div style="text-align: center;">
+            <img src="img/res_multi_opt.png" class="img-responsive" alt="res_multi_opt" width="100%" />
+        </div>
+    </figure>
+
+    For detailed results and analysis, please refer to our paper.
+
+    <h3> Future work</h3>
+
+     Although this study successfully demonstrates the efficacy of Bayesian Optimization for offline parameter tuning, several avenues remain for extending the framework's applicability to dynamic, real-world environments.  <br/> <br/>
+
+First, future research will focus on transitioning from static offline configuration to online run-time adaptation. By integrating lightweight surrogate models, such as Contextual Bandits, the system could dynamically adjust voltage and frequency (DVFS) settings in response to real-time traffic bursts, rather than relying on a fixed schedule. <br/> <br/>
+
+Additionally, we aim to relax the assumption of independent tasks by incorporating task dependency models, specifically Directed Acyclic Graphs (DAGs). Handling inter-task dependencies introduces additional challenges regarding communication overhead and pipeline stalling, which are critical for complex embedded applications like video processing.<br/> <br/>
+
+    <h3>
+        Acknowledgements
+    </h3>
+
+    We sincerely appreciate Professor <a href="https://carlhenrik.com/">Carl Henrik Ek</a> for organizing the exciting module <a href="https://www.cl.cam.ac.uk/teaching/2526/L48/">L48 Machine Learning and the Physical World</a> at Department of Computer Science and Technology, University of Cambridge and providing consistent feedback regarding this project during the proposal and viva phase.
 
     <br/>
     <br/>
