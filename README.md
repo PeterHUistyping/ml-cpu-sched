@@ -12,6 +12,20 @@ $^\dagger$ denotes equal contribution.
 - [Cambridge ACS L48 MLPW](https://www.cl.cam.ac.uk/teaching/2526/L48/) project, [course page](https://mlatcl.github.io/mlphysical/), [2526](https://carlhenrik.com/l48-mlpw/).
 - We sincerely appreciate [Professor Carl Henrik Ek](https://carlhenrik.com/) for organizing this exciting module and providing consistent feedback regarding this project during the proposal phase.
 
+If you find this project useful, please consider citing:
+
+```
+@misc{HuShi2026mlcpusched,
+      title={Machine Learning for Energy-Performance-aware Scheduling}, 
+      author={Zheyuan Hu and Yifei Shi},
+      year={2026},
+      eprint={2601.23134},
+      archivePrefix={arXiv},
+      primaryClass={cs.AR},
+      url={https://arxiv.org/abs/2601.23134}, 
+}
+```
+
 ## Installation
 
 Conda environment setup:
