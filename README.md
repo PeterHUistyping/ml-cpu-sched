@@ -5,7 +5,7 @@ A machine learning-based study for scheduling heterogeneous multi-core systems.
 
 Zheyuan (Peter) Hu $^\dagger$, Yifei Shi $^\dagger$.
 
-$^\dagger$ denotes equal contribution.
+$^\dagger$ denotes equal contribution. Accepted by NeurIPS'26 MLForSys Workshop (Poster).
 
 | Gaussian process | sensitivity analysis | Bayesian optimization |
 
